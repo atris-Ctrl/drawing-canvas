@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import "./cursorStyle.css";
-import { useDraw } from "../context/DrawProvider";
+import { useDraw } from "../contexts/DrawProvider";
 
 function Cursor() {
   const cursorRef = useRef(null);

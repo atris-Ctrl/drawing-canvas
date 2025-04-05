@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useDraw } from "../context/DrawProvider";
+import { useDraw } from "../contexts/DrawProvider";
 function getMousePos(canvas, e) {
   var rect = canvas.getBoundingClientRect();
   return { x: e.clientX - rect.left, y: e.clientY - rect.top };

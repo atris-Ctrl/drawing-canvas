@@ -2,19 +2,19 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import Cursor from "./components/Cursor";
 import DrawingCanvas from "./components/DrawingCanvas";
-import { DrawProvider, useDraw } from "./context/DrawProvider";
+import { DrawProvider } from "./contexts/DrawProvider";
 import ToolBar from "./components/ToolBar";
 function App() {
   // const [dimensions, setDimensions] = useState({
   //   width: window.innerWidth,
   //   height: window.innerHeight,
   // });
+  const [isVisible, setIsVisible] = useState(true);
   const pr = window.devicePixelRatio;
   const dimensions = {
     width: window.innerWidth * pr,
     height: window.innerHeight * pr,
   };
-  const [isVisible, setIsVisible] = useState(true);
 
   return (
     <div className="layout-div">
