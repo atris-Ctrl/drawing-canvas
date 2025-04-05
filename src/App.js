@@ -1,23 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
-
+import { useState, useEffect } from "react";
+import "./App.css";
+import Cursor from "./components/Cursor";
+import DrawingCanvas from "./components/DrawingCanvas";
+import { DrawProvider, useDraw } from "./context/DrawProvider";
+import ToolBar from "./components/ToolBar";
 function App() {
+  // const [dimensions, setDimensions] = useState({
+  //   width: window.innerWidth,
+  //   height: window.innerHeight,
+  // });
+  const pr = window.devicePixelRatio;
+  const dimensions = {
+    width: window.innerWidth * pr,
+    height: window.innerHeight * pr,
+  };
+  const [isVisible, setIsVisible] = useState(true);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="layout-div">
+      <DrawProvider>
+        <Cursor />
+        {isVisible ? (
+          <ToolBar onVisible={setIsVisible} />
+        ) : (
+          <div>
+            <button onClick={() => setIsVisible((isVisible) => !isVisible)}>
+              open
+            </button>
+          </div>
+        )}
+        <div className="canvas-div">
+          <DrawingCanvas dimensions={dimensions} />
+        </div>
+      </DrawProvider>
     </div>
   );
 }

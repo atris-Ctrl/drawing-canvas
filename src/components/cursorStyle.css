@@ -1,0 +1,23 @@
+.main-cursor {
+  z-index: 10000;
+  pointer-events: none;
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+
+  position: fixed;
+}
+
+.main-cursor {
+  transition: opacity 1s cubic-bezier(0.77, 0, 0.175, 1);
+  animation: fadeIn 1s cubic-bezier(0.77, 0, 0.175, 1) 0s forwards;
+  mix-blend-mode: difference;
+
+  .main-cursor-background {
+    background: rgb(83, 4, 4);
+    border: 1.5px solid gray;
+    opacity: 30%;
+    border-radius: 50%;
+    padding: 0;
+    margin: 0;
+  }
+}
