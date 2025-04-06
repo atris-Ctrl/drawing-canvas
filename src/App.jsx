@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./App.css";
+import Button from "./components/Button";
 import Cursor from "./components/Cursor";
 import DrawingCanvas from "./components/DrawingCanvas";
 import { DrawProvider } from "./contexts/DrawProvider";
@@ -24,9 +25,9 @@ function App() {
           <ToolBar onVisible={setIsVisible} />
         ) : (
           <div>
-            <button onClick={() => setIsVisible((isVisible) => !isVisible)}>
+            <Button onClick={() => setIsVisible((isVisible) => !isVisible)}>
               open
-            </button>
+            </Button>
           </div>
         )}
         <div className="canvas-div">

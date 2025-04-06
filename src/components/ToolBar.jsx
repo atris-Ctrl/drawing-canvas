@@ -1,4 +1,5 @@
 import { useDraw } from "../contexts/DrawProvider";
+import Button from "./Button";
 
 function ToolBar({ onVisible }) {
   const {
@@ -16,9 +17,9 @@ function ToolBar({ onVisible }) {
   return (
     <div className="tools-div">
       <h3>Tools</h3>
-      <button onClick={() => setIsErasing((isErasing) => !isErasing)}>
+      <Button onClick={() => setIsErasing((isErasing) => !isErasing)}>
         Erase
-      </button>
+      </Button>
       <label>Brush size {brushSize}</label>
       <input
         type="range"
@@ -42,11 +43,16 @@ function ToolBar({ onVisible }) {
         value={brushColor}
         onChange={(e) => setBrushColor(e.target.value)}
       ></input>
-      <button onClick={() => setClearCanvas(true)}>Clear</button>
-      <button>Save</button>
-      <button onClick={() => onVisible((isVisible) => !isVisible)}>
-        close
-      </button>
+      <Button
+        className="border-purple-200 text-purple-600"
+        onClick={() => setClearCanvas(true)}
+      >
+        Clear
+      </Button>
+      <Button>Save</Button>
+      <Button onClick={() => onVisible((isVisible) => !isVisible)}>
+        Close
+      </Button>
     </div>
   );
 }
