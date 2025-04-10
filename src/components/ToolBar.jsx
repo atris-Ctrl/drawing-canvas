@@ -21,14 +21,17 @@ function ToolBar({ onVisible }) {
             setPenMode("eraser");
           }}
         >
-          Eraser
+          <i class="fa-solid fa-eraser"></i>
         </Button>
         <Button
           onClick={() => {
             setPenMode("pen");
           }}
         >
-          Pen
+          <i class="fa-solid fa-pencil"></i>
+        </Button>
+        <Button onClick={() => setPenMode("sticker")}>
+          <i class="fa-regular fa-note-sticky"></i>
         </Button>
       </>
       <label>Brush size {brushSize}</label>
@@ -50,14 +53,9 @@ function ToolBar({ onVisible }) {
       <label>Brush Color</label>
       <ColorPicker />
 
-      <Button
-        className="border-purple-200 text-purple-600"
-        onClick={() => setClearCanvas(true)}
-      >
-        Clear
-      </Button>
+      <Button onClick={() => setClearCanvas(true)}>Clear</Button>
       <Button>Save</Button>
-      <Button onClick={() => setPenMode("sticker")}>Sticker</Button>
+
       <Button onClick={() => onVisible((isVisible) => !isVisible)}>
         Close
       </Button>

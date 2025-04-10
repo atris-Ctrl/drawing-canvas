@@ -4,6 +4,7 @@ const DrawContext = createContext();
 const RECENT_COLORS_SIZE = 5;
 function DrawProvider({ children }) {
   // zoom in and out
+  // layers
   // remember recent color
   // remove the cursror
   // history
