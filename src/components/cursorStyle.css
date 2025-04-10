@@ -11,7 +11,8 @@
   transition: opacity 1s cubic-bezier(0.77, 0, 0.175, 1);
   animation: fadeIn 1s cubic-bezier(0.77, 0, 0.175, 1) 0s forwards;
   mix-blend-mode: difference;
-
+  padding: 0%;
+  margin: 0;
   .main-cursor-background {
     background: rgb(83, 4, 4);
     border: 1.5px solid gray;

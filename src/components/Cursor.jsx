@@ -15,8 +15,8 @@ function Cursor() {
 
     if (!cursor) return;
     function updatePosition(e) {
-      const x = e.clientX;
-      const y = e.clientY;
+      const x = e.clientX + 2;
+      const y = e.clientY + 2;
       cursor.style.transform = `translate3d(${x - cursor.clientWidth / 2}px, ${
         y - cursor.clientHeight / 2
       }px, 0)`;

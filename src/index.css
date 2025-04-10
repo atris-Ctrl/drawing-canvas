@@ -4,8 +4,8 @@
 
 body {
   margin: 0;
-  padding: 0%;
-  cursor: none;
+  padding: 0;
+  /* cursor: none; */
 }
 
 .layout-div {
@@ -21,9 +21,15 @@ body {
   color: aliceblue;
 }
 
+.canvas-div {
+  top: 0;
+  left: 0;
+}
 canvas {
   display: block;
+
   border: 2px solid blue;
+  /* cursor: none; */
 }
 
 .btn {

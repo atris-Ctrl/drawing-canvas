@@ -1,24 +1,24 @@
 import { useDraw } from "../contexts/DrawProvider";
 import Button from "./Button";
+import ColorPicker from "./ColorPicker";
 
 function ToolBar({ onVisible }) {
   const {
     brushSize,
-    brushColor,
     brushOpacity,
-    isErasing,
-    setIsErasing,
+    isSticker,
+    penMode,
+    setSticker,
+    setPenMode,
     setBrushOpacity,
     setBrushSize,
-    setBrushColor,
     setClearCanvas,
-    setIsVisible,
   } = useDraw();
   return (
     <div className="tools-div">
       <h3>Tools</h3>
-      <Button onClick={() => setIsErasing((isErasing) => !isErasing)}>
-        Erase
+      <Button onClick={() => setPenMode((isErasing) => !isErasing)}>
+        {penMode ? "Pen" : "Eraser"}
       </Button>
       <label>Brush size {brushSize}</label>
       <input
@@ -36,13 +36,9 @@ function ToolBar({ onVisible }) {
         value={brushOpacity}
         onChange={(e) => setBrushOpacity(e.target.value)}
       />
-      <label>Color</label>
-      <input
-        type="color"
-        id="color-pick"
-        value={brushColor}
-        onChange={(e) => setBrushColor(e.target.value)}
-      ></input>
+      <label>Brush Color</label>
+      <ColorPicker></ColorPicker>
+
       <Button
         className="border-purple-200 text-purple-600"
         onClick={() => setClearCanvas(true)}
@@ -50,6 +46,7 @@ function ToolBar({ onVisible }) {
         Clear
       </Button>
       <Button>Save</Button>
+      <Button onClick={() => setSticker(true)}>Sticker</Button>
       <Button onClick={() => onVisible((isVisible) => !isVisible)}>
         Close
       </Button>

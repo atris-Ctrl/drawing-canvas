@@ -1,28 +1,45 @@
 import { useEffect, useRef, useState } from "react";
 import { useDraw } from "../contexts/DrawProvider";
+
 function getMousePos(canvas, e) {
-  var rect = canvas.getBoundingClientRect();
+  const rect = canvas.getBoundingClientRect();
   return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 }
 
 function DrawingCanvas({ dimensions, imgSrc }) {
   const canvasRef = useRef(null);
-  const [isDrawing, setIsDrawing] = useState(false);
-  const { width, height } = dimensions;
+  const isDrawingRef = useRef(false);
+  const lastXYRef = useRef({ x: 0, y: 0 });
+  const brushColorRef = useRef();
+  const brushSizeRef = useRef();
+  const brushOpacityRef = useRef();
+  const penModeRef = useRef();
 
-  const { brushSize, brushOpacity, brushColor, clearCanvas, setClearCanvas } =
-    useDraw();
-  // useEffect(() => {
-  //   const canvas = canvasRef.current;
-  //   const ctx = canvas.getContext("2d");
-  //   window.addEventListener("resize", resizeCanvas, false);
-  //   function resizeCanvas() {
-  //     canvas.width = window.innerWidth;
-  //     canvas.height = window.innerHeight;
-  //     redraw();
-  //   }
-  //   function redraw() {}
-  // }, []);
+  const { width, height } = dimensions;
+  const {
+    brushSize,
+    brushOpacity,
+    penMode,
+    brushColor,
+    clearCanvas,
+    setClearCanvas,
+  } = useDraw();
+
+  useEffect(() => {
+    brushColorRef.current = brushColor;
+  }, [brushColor]);
+
+  useEffect(() => {
+    brushSizeRef.current = brushSize;
+  }, [brushSize]);
+
+  useEffect(() => {
+    brushOpacityRef.current = brushOpacity;
+  }, [brushOpacity]);
+
+  useEffect(() => {
+    penModeRef.current = penMode;
+  }, [penMode]);
 
   useEffect(() => {
     if (clearCanvas) {
@@ -40,47 +57,65 @@ function DrawingCanvas({ dimensions, imgSrc }) {
     if (!ctx) return;
 
     const draw = (e) => {
-      if (!isDrawing) return;
+      if (!isDrawingRef.current) return;
 
       const pos = getMousePos(canvas, e);
-      ctx.lineCap = "round";
-      ctx.lineWidth = brushSize;
-      ctx.globalAlpha = brushOpacity / 100;
-      ctx.strokeStyle = brushColor;
+      const last = lastXYRef.current;
+
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
       ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+
+      lastXYRef.current = { x: pos.x, y: pos.y };
+    };
+
+    const startDrawing = (e) => {
+      const pos = getMousePos(canvas, e);
+      lastXYRef.current = { x: pos.x, y: pos.y };
+      isDrawingRef.current = true;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = brushSizeRef.current;
+      ctx.globalAlpha = brushOpacityRef.current / 100;
+
+      if (!penModeRef.current) {
+        ctx.globalCompositeOperation = "source-over";
+        ctx.strokeStyle = brushColorRef.current;
+      } else {
+        ctx.globalCompositeOperation = "destination-out";
+      }
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+      ctx.lineTo(pos.x + 0.001, pos.y + 0.001);
       ctx.stroke();
     };
 
-    function startDrawing(e) {
-      const pos = getMousePos(canvas, e);
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
-      setIsDrawing(true);
-    }
-
-    function endDrawing() {
-      setIsDrawing(false);
+    const endDrawing = () => {
+      isDrawingRef.current = false;
       ctx.closePath();
-    }
+    };
+
     canvas.addEventListener("mousedown", startDrawing);
     canvas.addEventListener("mousemove", draw);
     canvas.addEventListener("mouseup", endDrawing);
     canvas.addEventListener("mouseleave", endDrawing);
+
     return () => {
       canvas.removeEventListener("mousedown", startDrawing);
       canvas.removeEventListener("mousemove", draw);
       canvas.removeEventListener("mouseup", endDrawing);
       canvas.removeEventListener("mouseleave", endDrawing);
     };
-  }, [width, height, isDrawing, brushColor, brushSize, brushOpacity]);
-  const styled = {
-    display: "block",
-  };
+  }, [width, height]);
+
   return (
-    <>
-      <canvas style={styled} ref={canvasRef} width={width} height={height} />
-      {/* <Cursor canvasRef={canvasRef} size={brushSize} color={brushColor} /> */}
-    </>
+    <canvas
+      ref={canvasRef}
+      width={width}
+      height={height}
+      style={{ display: "block" }}
+    />
   );
 }
 
