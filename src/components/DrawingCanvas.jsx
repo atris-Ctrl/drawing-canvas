@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDraw } from "../contexts/DrawProvider";
+import Cursor from "./Cursor";
 
 function getMousePos(canvas, e) {
   const rect = canvas.getBoundingClientRect();
@@ -52,6 +53,7 @@ function DrawingCanvas({ dimensions, imgSrc }) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
+
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -72,6 +74,20 @@ function DrawingCanvas({ dimensions, imgSrc }) {
 
     const startDrawing = (e) => {
       const pos = getMousePos(canvas, e);
+      const penMode = penModeRef.current;
+      ctx.globalCompositeOperation = "source-over";
+
+      if (penMode == "sticker") {
+        const img = new Image();
+        img.src = "stickers/test.png";
+        img.onload = function () {
+          const width = this.width;
+          const height = this.height;
+
+          ctx.drawImage(img, pos.x - width / 2, pos.y - height / 2);
+        };
+        return;
+      }
       lastXYRef.current = { x: pos.x, y: pos.y };
       isDrawingRef.current = true;
       ctx.lineCap = "round";
@@ -79,10 +95,9 @@ function DrawingCanvas({ dimensions, imgSrc }) {
       ctx.lineWidth = brushSizeRef.current;
       ctx.globalAlpha = brushOpacityRef.current / 100;
 
-      if (!penModeRef.current) {
-        ctx.globalCompositeOperation = "source-over";
+      if (penMode == "pen") {
         ctx.strokeStyle = brushColorRef.current;
-      } else {
+      } else if (penMode == "eraser") {
         ctx.globalCompositeOperation = "destination-out";
       }
       ctx.beginPath();
@@ -110,12 +125,15 @@ function DrawingCanvas({ dimensions, imgSrc }) {
   }, [width, height]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      style={{ display: "block" }}
-    />
+    <>
+      <Cursor canvasRef={canvasRef} />
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
+        style={{ display: "block", cursor: "none" }}
+      />
+    </>
   );
 }
 

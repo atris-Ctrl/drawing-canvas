@@ -5,7 +5,6 @@
 body {
   margin: 0;
   padding: 0;
-  /* cursor: none; */
 }
 
 .layout-div {
@@ -28,7 +27,7 @@ body {
 canvas {
   display: block;
 
-  border: 2px solid blue;
+  border: 2px solid rgb(21, 21, 29);
   /* cursor: none; */
 }
 

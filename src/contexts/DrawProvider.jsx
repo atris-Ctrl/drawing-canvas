@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from "react";
 
 const DrawContext = createContext();
-
+const RECENT_COLORS_SIZE = 5;
 function DrawProvider({ children }) {
   // zoom in and out
   // remember recent color
@@ -15,17 +15,40 @@ function DrawProvider({ children }) {
   const [brushOpacity, setBrushOpacity] = useState(100);
   const [clearCanvas, setClearCanvas] = useState(false);
   const [isSticker, setSticker] = useState(false);
-  const [penMode, setPenMode] = useState(false);
+  const [penMode, setPenMode] = useState("pen");
   const [recentColors, setRecentColors] = useState([]);
-  function onSaveDrawing() {}
+  function onSaveDrawing() {
+    // Convert canvas to image
+    // document
+    //   .getElementById("btn-download")
+    //   .addEventListener("click", function (e) {
+    //     var canvas = document.querySelector("#my-canvas");
+    //     var dataURL = canvas.toDataURL("image/jpeg", 1.0);
+    //     downloadImage(dataURL, "my-canvas.jpeg");
+    //   });
+    // function downloadImage(data, filename = "untitled.jpeg") {
+    //   var a = document.createElement("a");
+    //   a.href = data;
+    //   a.download = filename;
+    //   document.body.appendChild(a);
+    //   a.click();
+    // }
+  }
   function handleAddColor(color) {
-    setRecentColors((colors) => [...colors, color]);
+    setRecentColors((colors) => {
+      if (colors.length == RECENT_COLORS_SIZE) {
+        colors.shift();
+      }
+      return [...colors, color];
+    });
   }
   return (
     <DrawContext.Provider
       value={{
         brushColor,
         penMode,
+        isSticker,
+        setSticker,
         setPenMode,
         brushSize,
         brushOpacity,

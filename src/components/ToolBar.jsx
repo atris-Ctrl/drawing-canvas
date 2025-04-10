@@ -6,9 +6,7 @@ function ToolBar({ onVisible }) {
   const {
     brushSize,
     brushOpacity,
-    isSticker,
     penMode,
-    setSticker,
     setPenMode,
     setBrushOpacity,
     setBrushSize,
@@ -17,9 +15,22 @@ function ToolBar({ onVisible }) {
   return (
     <div className="tools-div">
       <h3>Tools</h3>
-      <Button onClick={() => setPenMode((isErasing) => !isErasing)}>
-        {penMode ? "Pen" : "Eraser"}
-      </Button>
+      <>
+        <Button
+          onClick={() => {
+            setPenMode("eraser");
+          }}
+        >
+          Eraser
+        </Button>
+        <Button
+          onClick={() => {
+            setPenMode("pen");
+          }}
+        >
+          Pen
+        </Button>
+      </>
       <label>Brush size {brushSize}</label>
       <input
         type="range"
@@ -37,7 +48,7 @@ function ToolBar({ onVisible }) {
         onChange={(e) => setBrushOpacity(e.target.value)}
       />
       <label>Brush Color</label>
-      <ColorPicker></ColorPicker>
+      <ColorPicker />
 
       <Button
         className="border-purple-200 text-purple-600"
@@ -46,7 +57,7 @@ function ToolBar({ onVisible }) {
         Clear
       </Button>
       <Button>Save</Button>
-      <Button onClick={() => setSticker(true)}>Sticker</Button>
+      <Button onClick={() => setPenMode("sticker")}>Sticker</Button>
       <Button onClick={() => onVisible((isVisible) => !isVisible)}>
         Close
       </Button>

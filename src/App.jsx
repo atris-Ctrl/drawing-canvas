@@ -20,7 +20,7 @@ function App() {
   return (
     <div className="layout-div">
       <DrawProvider>
-        <Cursor />
+        {/* <Cursor /> */}
         {isVisible ? (
           <ToolBar onVisible={setIsVisible} />
         ) : (

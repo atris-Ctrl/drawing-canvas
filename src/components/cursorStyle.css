@@ -3,7 +3,6 @@
   pointer-events: none;
   overflow: hidden;
   transform: translate3d(0, 0, 0);
-
   position: fixed;
 }
 
@@ -13,9 +12,11 @@
   mix-blend-mode: difference;
   padding: 0%;
   margin: 0;
+  border: 1.5px solid gray;
+  border-radius: 50%;
+
   .main-cursor-background {
     background: rgb(83, 4, 4);
-    border: 1.5px solid gray;
     opacity: 50%;
     border-radius: 50%;
     padding: 0;
