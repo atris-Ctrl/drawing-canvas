@@ -14,26 +14,6 @@ function ToolBar({ onVisible }) {
   } = useDraw();
   return (
     <div className="tools-div">
-      <h3>Tools</h3>
-      <>
-        <Button
-          onClick={() => {
-            setPenMode("eraser");
-          }}
-        >
-          <i class="fa-solid fa-eraser"></i>
-        </Button>
-        <Button
-          onClick={() => {
-            setPenMode("pen");
-          }}
-        >
-          <i class="fa-solid fa-pencil"></i>
-        </Button>
-        <Button onClick={() => setPenMode("sticker")}>
-          <i class="fa-regular fa-note-sticky"></i>
-        </Button>
-      </>
       <label>Brush size {brushSize}</label>
       <input
         type="range"
@@ -53,6 +33,25 @@ function ToolBar({ onVisible }) {
       <label>Brush Color</label>
       <ColorPicker />
 
+      <>
+        <Button
+          onClick={() => {
+            setPenMode("eraser");
+          }}
+        >
+          <i className="fa-solid fa-eraser"></i>
+        </Button>
+        <Button
+          onClick={() => {
+            setPenMode("pen");
+          }}
+        >
+          <i className="fa-solid fa-pencil"></i>
+        </Button>
+        <Button onClick={() => setPenMode("sticker")}>
+          <i className="fa-regular fa-note-sticky"></i>
+        </Button>
+      </>
       <Button onClick={() => setClearCanvas(true)}>Clear</Button>
       <Button>Save</Button>
 

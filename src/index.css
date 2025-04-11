@@ -26,9 +26,7 @@ body {
 }
 canvas {
   display: block;
-
   border: 2px solid rgb(21, 21, 29);
-  /* cursor: none; */
 }
 
 .btn {

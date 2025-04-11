@@ -1,6 +1,10 @@
 function Button({ children, onClick }) {
+  function handleClick(e) {
+    e.preventDefault();
+    onClick?.(e);
+  }
   return (
-    <button className="btn btn-blue" onClick={onClick}>
+    <button className="btn btn-blue" onClick={handleClick}>
       {children}
     </button>
   );
