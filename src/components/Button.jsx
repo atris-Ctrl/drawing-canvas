@@ -4,7 +4,10 @@ function Button({ children, onClick }) {
     onClick?.(e);
   }
   return (
-    <button className="btn btn-blue" onClick={handleClick}>
+    <button
+      className="rounded font-bold text-white bg-blue-500 mx-10"
+      onClick={handleClick}
+    >
       {children}
     </button>
   );

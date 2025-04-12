@@ -8,21 +8,20 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { createContext, useContext, useState } from "react";
+const firebaseConfig = {
+  apiKey: "AIzaSyAwHAx-uiNDlP_fdn9_wFVBm2ryG8N0Rb0",
+  authDomain: "drawing-canvas-4004e.firebaseapp.com",
+  projectId: "drawing-canvas-4004e",
+  storageBucket: "drawing-canvas-4004e.firebasestorage.app",
+  messagingSenderId: "627720895603",
+  appId: "1:627720895603:web:61b0061c10a5fdaa163e06",
+  measurementId: "G-C0BPQLSWLG",
+};
 const AuthContext = createContext();
 function AuthProvider({ children }) {
   const [errorMessage, setErrorMessage] = useState("");
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAwHAx-uiNDlP_fdn9_wFVBm2ryG8N0Rb0",
-    authDomain: "drawing-canvas-4004e.firebaseapp.com",
-    projectId: "drawing-canvas-4004e",
-    storageBucket: "drawing-canvas-4004e.firebasestorage.app",
-    messagingSenderId: "627720895603",
-    appId: "1:627720895603:web:61b0061c10a5fdaa163e06",
-    measurementId: "G-C0BPQLSWLG",
-  };
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -37,7 +36,6 @@ function AuthProvider({ children }) {
       })
       .catch((error) => {
         const credential = GoogleAuthProvider.credentialFromError(error);
-        console.log("Google Sign In error:", error, credential);
         const errorCode = error.code;
         const errorMessage = error.message;
         setErrorMessage(`${errorCode} : ${errorMessage}`);
@@ -77,6 +75,7 @@ function AuthProvider({ children }) {
   const value = {
     user,
     userLogin,
+    errorMessage,
     createNewUser,
     userSignOut,
     userGoogleSignIn,

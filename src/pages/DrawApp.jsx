@@ -1,9 +1,9 @@
 import { useState } from "react";
-import "./App.css";
-import Button from "./components/Button";
-import DrawingCanvas from "./components/DrawingCanvas";
-import { DrawProvider } from "./contexts/DrawProvider";
-import ToolBar from "./components/ToolBar";
+import "../App.css";
+import Button from "../components/Button";
+import DrawingCanvas from "../components/DrawingCanvas";
+import { DrawProvider } from "../contexts/DrawProvider";
+import ToolBar from "../components/ToolBar";
 
 function DrawApp() {
   const [isVisible, setIsVisible] = useState(true);

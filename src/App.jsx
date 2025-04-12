@@ -1,20 +1,21 @@
 import { BrowserRouter, Route, Routes } from "react-router";
-import "./App.css";
-import DrawApp from "./DrawApp";
+import DrawApp from "./pages/DrawApp";
 import AuthLayout from "./AuthLayout";
 import { AuthProvider } from "./contexts/AuthProvider";
-import Login from "./LoginPage";
-import Register from "./RegisterPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import HomePage from "./pages/HomePage";
 function App() {
   return (
     <div>
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route index element={<DrawApp />} />
+            <Route index element={<HomePage />} />
+            <Route path="canvas" element={<DrawApp />} />
             <Route element={<AuthLayout />}>
-              <Route path="login" element={<Login />} />
-              <Route path="register" element={<Register />} />
+              <Route path="login" element={<LoginPage />} />
+              <Route path="register" element={<RegisterPage />} />
             </Route>
           </Routes>
         </BrowserRouter>

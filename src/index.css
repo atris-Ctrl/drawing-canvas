@@ -1,10 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Indie+Flower&family=Oswald&family=REM:wght@200&family=Raleway:ital,wght@0,100..900;1,100..900&family=Ubuntu:wght@500&display=swap");
 
 body {
   margin: 0;
   padding: 0;
+  background-color: rgb(243, 247, 167);
+  @apply font-custom;
 }
 
 .layout-div {
@@ -27,14 +30,5 @@ body {
 canvas {
   display: block;
   border: 2px solid rgb(21, 21, 29);
-}
-
-.btn {
-  @apply font-bold py-2 px-3 rounded-full;
-}
-.btn-blue {
-  @apply bg-blue-500 text-white;
-}
-.btn-blue:hover {
-  @apply bg-blue-700;
+  background-color: transparent;
 }

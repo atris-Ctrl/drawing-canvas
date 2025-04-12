@@ -1,6 +1,7 @@
 import { useDraw } from "../contexts/DrawProvider";
 import Button from "./Button";
 import ColorPicker from "./ColorPicker";
+import StickersPlane from "./StickersPlane";
 
 function ToolBar({ onVisible }) {
   const {
@@ -39,17 +40,17 @@ function ToolBar({ onVisible }) {
             setPenMode("eraser");
           }}
         >
-          <i className="fa-solid fa-eraser"></i>
+          <i className="fa-solid fa-eraser">Eraser</i>
         </Button>
         <Button
           onClick={() => {
             setPenMode("pen");
           }}
         >
-          <i className="fa-solid fa-pencil"></i>
+          <i className="fa-solid fa-pencil">Pencil</i>
         </Button>
         <Button onClick={() => setPenMode("sticker")}>
-          <i className="fa-regular fa-note-sticky"></i>
+          <i className="fa-regular fa-note-sticky">Sticker</i>
         </Button>
       </>
       <Button onClick={() => setClearCanvas(true)}>Clear</Button>
@@ -58,6 +59,7 @@ function ToolBar({ onVisible }) {
       <Button onClick={() => onVisible((isVisible) => !isVisible)}>
         Close
       </Button>
+      <StickersPlane />
     </div>
   );
 }
