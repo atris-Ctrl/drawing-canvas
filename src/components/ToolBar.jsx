@@ -1,7 +1,7 @@
 import { useDraw } from "../contexts/DrawProvider";
 import Button from "./Button";
-import ColorPicker from "./ColorPicker";
-import StickersPlane from "./StickersPlane";
+import ColorPicker from "./colors/ColorPicker";
+import StickersPlane from "./stickers/StickersPlane";
 
 function ToolBar({ onVisible }) {
   const {
@@ -13,52 +13,85 @@ function ToolBar({ onVisible }) {
     setBrushSize,
     setClearCanvas,
   } = useDraw();
+
   return (
-    <div className="tools-div">
-      <label>Brush size {brushSize}</label>
-      <input
-        type="range"
-        min="1"
-        max="100"
-        value={brushSize}
-        onChange={(e) => setBrushSize(e.target.value)}
-      />
-      <label>Brush opacity {brushOpacity}</label>
-      <input
-        type="range"
-        min="1"
-        max="100"
-        value={brushOpacity}
-        onChange={(e) => setBrushOpacity(e.target.value)}
-      />
-      <label>Brush Color</label>
-      <ColorPicker />
+    <div className="bg-white p-6 shadow-lg w-80 space-y-6 font-sans text-gray-800 text-lg border-4 border-black-300">
+      <div className="space-y-3">
+        <label className="block text-2xl font-semibold">
+          🖌️ Brush Size: {brushSize}
+        </label>
+        <input
+          type="range"
+          min="1"
+          max="100"
+          value={brushSize}
+          onChange={(e) => setBrushSize(e.target.value)}
+          className="w-full accent-pink-400"
+        />
+      </div>
 
-      <>
-        <Button
-          onClick={() => {
-            setPenMode("eraser");
-          }}
-        >
-          <i className="fa-solid fa-eraser">Eraser</i>
-        </Button>
-        <Button
-          onClick={() => {
-            setPenMode("pen");
-          }}
-        >
-          <i className="fa-solid fa-pencil">Pencil</i>
-        </Button>
-        <Button onClick={() => setPenMode("sticker")}>
-          <i className="fa-regular fa-note-sticky">Sticker</i>
-        </Button>
-      </>
-      <Button onClick={() => setClearCanvas(true)}>Clear</Button>
-      <Button>Save</Button>
+      <div className="space-y-3">
+        <label className="block text-2xl font-semibold">
+          🌫️ Brush Opacity: {brushOpacity}
+        </label>
+        <input
+          type="range"
+          min="1"
+          max="100"
+          value={brushOpacity}
+          onChange={(e) => setBrushOpacity(e.target.value)}
+          className="w-full accent-pink-400"
+        />
+      </div>
 
-      <Button onClick={() => onVisible((isVisible) => !isVisible)}>
-        Close
-      </Button>
+      <div>
+        <label className="block text-2xl font-semibold mb-2">
+          🎨 Brush Color
+        </label>
+        <ColorPicker />
+      </div>
+
+      <div className="flex justify-between">
+        <Button
+          onClick={() => setPenMode("eraser")}
+          title="Eraser"
+          styleClass={
+            penMode === "eraser" ? "bg-pink-600 scale-115 shadow-md" : ""
+          }
+        >
+          {/* <img src="/stickers/eraser.png"></img> */}
+
+          <i className="fa-solid fa-eraser text-xl" />
+        </Button>
+        <Button
+          onClick={() => setPenMode("pen")}
+          title="Pen"
+          styleClass={
+            penMode === "pen" ? "bg-pink-600 scale-115 shadow-md" : ""
+          }
+        >
+          {/* <img src="/stickers/pen.png"></img> */}
+          <i className="fa-solid fa-pencil text-xl" />
+        </Button>
+        <Button
+          onClick={() => setPenMode("sticker")}
+          title="Sticker"
+          styleClass={
+            penMode === "sticker" ? "bg-pink-600 scale-115 shadow-md" : ""
+          }
+        >
+          <i className="fa-regular fa-note-sticky text-xl" />
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 text-lg">
+        <Button onClick={() => setClearCanvas(true)}>🧼 Clear</Button>
+        <Button>💾 Save</Button>
+        <Button onClick={() => onVisible((isVisible) => !isVisible)}>
+          ❌ Close
+        </Button>
+      </div>
+
       <StickersPlane />
     </div>
   );

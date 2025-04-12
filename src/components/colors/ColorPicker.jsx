@@ -1,5 +1,4 @@
-import { useDraw } from "../contexts/DrawProvider";
-import Button from "./Button";
+import { useDraw } from "../../contexts/DrawProvider";
 import Color from "./Color";
 
 function ColorPicker() {
@@ -10,7 +9,9 @@ function ColorPicker() {
     setBrushColor(color);
   }
 
-  function changeColor() {}
+  function changeColor(e) {
+    setBrushColor(e.target.id);
+  }
   return (
     <div>
       <input
@@ -19,9 +20,9 @@ function ColorPicker() {
         value={brushColor}
         onChange={handleColor}
       ></input>
-      <div className="flex gap-1">
+      <div className="flex gap-2 flex-wrap">
         {recentColors.map((color) => (
-          <Color colorCode={color}></Color>
+          <Color key={color} colorCode={color} onClick={changeColor}></Color>
         ))}
       </div>
     </div>

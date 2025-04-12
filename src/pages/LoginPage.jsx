@@ -21,14 +21,14 @@ function LoginPage() {
     }
   }
   return (
-    <div>
+    <>
       <UserForm title="Log In" buttonText="Log In" onSubmit={handleLogin}>
         <Button onClick={handleGoogleLogin} type="button">
           Sign in with Google
         </Button>
         <Link to="/register">Create your account here</Link>
       </UserForm>
-    </div>
+    </>
   );
 }
 

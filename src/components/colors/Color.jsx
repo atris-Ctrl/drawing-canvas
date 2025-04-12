@@ -5,6 +5,7 @@ function Color({ colorCode, onClick }) {
   };
   return (
     <div
+      id={colorCode}
       style={{ backgroundColor: colorCode }}
       onClick={handleClick}
       className="w-6 h-6 border-2 border-white rounded-md shadow-md"

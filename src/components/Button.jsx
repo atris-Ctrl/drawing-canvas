@@ -1,12 +1,13 @@
-function Button({ children, onClick }) {
+function Button({ children, onClick, styleClass }) {
   function handleClick(e) {
     e.preventDefault();
     onClick?.(e);
   }
+
   return (
     <button
-      className="rounded font-bold text-white bg-blue-500 mx-10"
       onClick={handleClick}
+      className={`mx-2 px-3 py-2 rounded-2xl bg-pink-400 text-white font-semibold shadow-md hover:bg-pink-300 transition-all duration-300 ease-in-out active:scale-95 ${styleClass}`}
     >
       {children}
     </button>
