@@ -1,8 +1,9 @@
 import { useDraw } from "../contexts/DrawProvider";
 import Button from "./Button";
 import ColorPicker from "./colors/ColorPicker";
+import GradientDiv from "./GradientDiv";
 import StickersPlane from "./stickers/StickersPlane";
-
+import "xp.css/dist/XP.css";
 function ToolBar({ onVisible }) {
   const {
     brushSize,
@@ -15,8 +16,8 @@ function ToolBar({ onVisible }) {
   } = useDraw();
 
   return (
-    <div className="bg-white p-6 shadow-lg w-80 space-y-6 font-sans text-gray-800 text-lg border-4 border-black-300">
-      <div className="space-y-3">
+    <div className="tools-div border-[#7e8acf] p-6 shadow-lg w-80 space-y-6  text-gray-800 text-lg border-4 border-black-300">
+      <GradientDiv>
         <label className="block text-2xl font-semibold">
           🖌️ Brush Size: {brushSize}
         </label>
@@ -26,30 +27,32 @@ function ToolBar({ onVisible }) {
           max="100"
           value={brushSize}
           onChange={(e) => setBrushSize(e.target.value)}
-          className="w-full accent-pink-400"
+          className="w-full accent-white"
         />
-      </div>
+      </GradientDiv>
 
-      <div className="space-y-3">
-        <label className="block text-2xl font-semibold">
-          🌫️ Brush Opacity: {brushOpacity}
-        </label>
-        <input
-          type="range"
-          min="1"
-          max="100"
-          value={brushOpacity}
-          onChange={(e) => setBrushOpacity(e.target.value)}
-          className="w-full accent-pink-400"
-        />
-      </div>
+      <GradientDiv>
+        <div className="space-y-3">
+          <label className="block text-2xl font-semibold">
+            🌫️ Brush Opacity: {brushOpacity}
+          </label>
+          <input
+            type="range"
+            min="1"
+            max="100"
+            value={brushOpacity}
+            onChange={(e) => setBrushOpacity(e.target.value)}
+            className="w-full accent-white"
+          />
+        </div>
+      </GradientDiv>
 
-      <div>
-        <label className="block text-2xl font-semibold mb-2">
-          🎨 Brush Color
-        </label>
-        <ColorPicker />
-      </div>
+      <GradientDiv>
+        <div>
+          <label className="text-2xl font-semibold mb-2">🎨 Brush Color</label>
+          <ColorPicker />
+        </div>
+      </GradientDiv>
 
       <div className="flex justify-between">
         <Button

@@ -15,9 +15,10 @@ function DrawProvider({ children }) {
   const [brushSize, setBrushSize] = useState(5);
   const [brushOpacity, setBrushOpacity] = useState(100);
   const [clearCanvas, setClearCanvas] = useState(false);
-  const [isSticker, setSticker] = useState(false);
+  const [sticker, setSticker] = useState(false);
   const [penMode, setPenMode] = useState("pen");
   const [recentColors, setRecentColors] = useState([]);
+
   function onSaveDrawing() {
     // Convert canvas to image
     // document
@@ -48,7 +49,7 @@ function DrawProvider({ children }) {
       value={{
         brushColor,
         penMode,
-        isSticker,
+        sticker,
         setSticker,
         setPenMode,
         brushSize,

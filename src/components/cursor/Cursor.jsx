@@ -21,7 +21,7 @@ function Cursor({ canvasRef }) {
     function updatePosition(e) {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
-      const y = e.clientY;
+      const y = e.clientY - rect.top;
       cursor.style.transform = `translate3d(${x - cursor.clientWidth / 2}px, ${
         y - cursor.clientHeight / 2
       }px, 0)`;

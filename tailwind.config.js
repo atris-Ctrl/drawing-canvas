@@ -5,6 +5,11 @@ export default {
       fontFamily: {
         custom: ["Indie Flower"],
       },
+      colors: {
+        customWhite: "#fcfdfd",
+        boarderBlue: "#819cef",
+        boardGrey: "#adafae",
+      },
     },
   },
   plugins: [],

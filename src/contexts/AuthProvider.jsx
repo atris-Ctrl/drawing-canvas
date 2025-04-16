@@ -16,6 +16,7 @@ const firebaseConfig = {
   messagingSenderId: "627720895603",
   appId: "1:627720895603:web:61b0061c10a5fdaa163e06",
   measurementId: "G-C0BPQLSWLG",
+  databaseURL: "https://drawing-canvas-4004e-default-rtdb.firebaseio.com/",
 };
 const AuthContext = createContext();
 function AuthProvider({ children }) {

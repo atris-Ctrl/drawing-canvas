@@ -4,6 +4,7 @@ import Button from "../components/Button";
 import DrawingCanvas from "../components/DrawingCanvas";
 import { DrawProvider } from "../contexts/DrawProvider";
 import ToolBar from "../components/ToolBar";
+import Header from "../components/Header";
 
 function DrawApp() {
   const [isVisible, setIsVisible] = useState(true);
@@ -14,21 +15,24 @@ function DrawApp() {
   };
 
   return (
-    <div className="layout-div">
-      <DrawProvider>
-        {isVisible ? (
-          <ToolBar onVisible={setIsVisible} />
-        ) : (
-          <div>
-            <Button onClick={() => setIsVisible((isVisible) => !isVisible)}>
-              open
-            </Button>
+    <div>
+      <Header />
+      <div className="layout-div flex flex-row h-screen">
+        <DrawProvider>
+          {isVisible ? (
+            <ToolBar onVisible={setIsVisible} />
+          ) : (
+            <div>
+              <Button onClick={() => setIsVisible((isVisible) => !isVisible)}>
+                open
+              </Button>
+            </div>
+          )}
+          <div className="canvas-div h-screen">
+            <DrawingCanvas dimensions={dimensions} />
           </div>
-        )}
-        <div className="canvas-div">
-          <DrawingCanvas dimensions={dimensions} />
-        </div>
-      </DrawProvider>
+        </DrawProvider>
+      </div>
     </div>
   );
 }
