@@ -4,10 +4,12 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  onAuthStateChanged,
   signOut,
   signInWithPopup,
+  updateProfile,
 } from "firebase/auth";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 const firebaseConfig = {
   apiKey: "AIzaSyAwHAx-uiNDlP_fdn9_wFVBm2ryG8N0Rb0",
   authDomain: "drawing-canvas-4004e.firebaseapp.com",
@@ -28,53 +30,79 @@ function AuthProvider({ children }) {
   const auth = getAuth(app);
   auth.languageCode = "it";
 
-  const userGoogleSignIn = () => {
+  const userGoogleSignIn = async () => {
     const googleAuthProvider = new GoogleAuthProvider();
-    return signInWithPopup(auth, googleAuthProvider)
-      .then((result) => {
-        const user = result.user;
-        setUser(user);
-      })
-      .catch((error) => {
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        setErrorMessage(`${errorCode} : ${errorMessage}`);
-      });
+    setIsLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleAuthProvider);
+      const user = result.user;
+      setUser(user);
+    } catch (error) {
+      const credential = GoogleAuthProvider.credentialFromError(error);
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      setErrorMessage(`${errorCode} : ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  function userLogin(email, password) {
-    return signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed in
+  async function userLogin(email, password, displayName) {
+    try {
+      setIsLoading(true);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      ).then(async (userCredential) => {
         const user = userCredential.user;
-        console.log(user);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        setErrorMessage(`${errorCode} : ${errorMessage}`);
-      });
-  }
-
-  function createNewUser(email, password) {
-    return createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
+        await updateProfile(user, { displayName });
         setUser(user);
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        setErrorMessage(`${errorCode} : ${errorMessage}`);
       });
+      // Signed in
+    } catch (error) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      setErrorMessage(`${errorCode} : ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  function userSignOut() {
+  async function createNewUser(email, password) {
+    try {
+      setIsLoading(true);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+      setUser(user);
+    } catch (error) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      setErrorMessage(`${errorCode} : ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function userSignOut() {
     return signOut(auth);
   }
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, [auth]);
+
   const value = {
     user,
+    isLoading,
     userLogin,
     errorMessage,
     createNewUser,

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Button from "../Button";
+import Button from "../styleComponent/Button";
 import { FaFileUpload } from "react-icons/fa";
 import "./fileupload.css";
 

@@ -5,6 +5,8 @@ import { AuthProvider } from "./contexts/AuthProvider";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import HomePage from "./pages/HomePage";
+import ToDoListPage from "./pages/ToDoListPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -12,8 +14,17 @@ function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route index element={<HomePage />} />
+            <Route
+              index
+              element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="canvas" element={<DrawApp />} />
+            <Route path="to-do" element={<ToDoListPage />} />
+
             <Route element={<AuthLayout />}>
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />

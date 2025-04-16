@@ -7,7 +7,7 @@ export default {
       },
       colors: {
         customWhite: "#fcfdfd",
-        boarderBlue: "#819cef",
+        boarderBlue: "#a1bdf7",
         boardGrey: "#adafae",
       },
     },

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "../App.css";
-import Button from "../components/Button";
+import Button from "../components/styleComponent/Button";
 import DrawingCanvas from "../components/DrawingCanvas";
 import { DrawProvider } from "../contexts/DrawProvider";
 import ToolBar from "../components/ToolBar";

@@ -1,7 +1,7 @@
 import { useDraw } from "../contexts/DrawProvider";
-import Button from "./Button";
+import Button from "./styleComponent/Button";
 import ColorPicker from "./colors/ColorPicker";
-import GradientDiv from "./GradientDiv";
+import GradientDiv from "./styleComponent/GradientDiv";
 import StickersPlane from "./stickers/StickersPlane";
 import "xp.css/dist/XP.css";
 function ToolBar({ onVisible }) {
@@ -21,14 +21,16 @@ function ToolBar({ onVisible }) {
         <label className="block text-2xl font-semibold">
           🖌️ Brush Size: {brushSize}
         </label>
-        <input
-          type="range"
-          min="1"
-          max="100"
-          value={brushSize}
-          onChange={(e) => setBrushSize(e.target.value)}
-          className="w-full accent-white"
-        />
+        <div className="bg-[#d8dff8] p-3">
+          <input
+            type="range"
+            min="1"
+            max="100"
+            value={brushSize}
+            onChange={(e) => setBrushSize(e.target.value)}
+            className="w-full accent-white"
+          />
+        </div>
       </GradientDiv>
 
       <GradientDiv>
@@ -36,20 +38,22 @@ function ToolBar({ onVisible }) {
           <label className="block text-2xl font-semibold">
             🌫️ Brush Opacity: {brushOpacity}
           </label>
-          <input
-            type="range"
-            min="1"
-            max="100"
-            value={brushOpacity}
-            onChange={(e) => setBrushOpacity(e.target.value)}
-            className="w-full accent-white"
-          />
+          <div className="bg-[#d8dff8] p-3">
+            <input
+              type="range"
+              min="1"
+              max="100"
+              value={brushOpacity}
+              onChange={(e) => setBrushOpacity(e.target.value)}
+              className="w-full accent-white"
+            />
+          </div>
         </div>
       </GradientDiv>
 
       <GradientDiv>
-        <div>
-          <label className="text-2xl font-semibold mb-2">🎨 Brush Color</label>
+        <label className="text-2xl font-semibold mb-2">🎨 Brush Color</label>
+        <div className="bg-[#d8dff8] p-3">
           <ColorPicker />
         </div>
       </GradientDiv>
@@ -59,28 +63,23 @@ function ToolBar({ onVisible }) {
           onClick={() => setPenMode("eraser")}
           title="Eraser"
           styleClass={
-            penMode === "eraser" ? "bg-pink-600 scale-115 shadow-md" : ""
+            penMode === "eraser" ? "bg-white scale-115 shadow-md" : ""
           }
         >
-          {/* <img src="/stickers/eraser.png"></img> */}
-
           <i className="fa-solid fa-eraser text-xl" />
         </Button>
         <Button
           onClick={() => setPenMode("pen")}
           title="Pen"
-          styleClass={
-            penMode === "pen" ? "bg-pink-600 scale-115 shadow-md" : ""
-          }
+          styleClass={penMode === "pen" ? "bg-white scale-115 shadow-md" : ""}
         >
-          {/* <img src="/stickers/pen.png"></img> */}
           <i className="fa-solid fa-pencil text-xl" />
         </Button>
         <Button
           onClick={() => setPenMode("sticker")}
           title="Sticker"
           styleClass={
-            penMode === "sticker" ? "bg-pink-600 scale-115 shadow-md" : ""
+            penMode === "sticker" ? "bg-white scale-115 shadow-md" : ""
           }
         >
           <i className="fa-regular fa-note-sticky text-xl" />

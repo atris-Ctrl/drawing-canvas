@@ -1,33 +1,37 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthProvider";
 import { Link, useNavigate } from "react-router";
 import UserForm from "../components/UserForm";
-import Button from "../components/Button";
+import Button from "../components/styleComponent/Button";
 
 function LoginPage() {
-  const { user, userLogin, userGoogleSignIn } = useAuth();
+  const { user, isLoading, userLogin, userGoogleSignIn } = useAuth();
   const navigate = useNavigate();
   function handleLogin(userEmail, userPassword) {
     if (userEmail === "" || userPassword === "") return;
     userLogin(userEmail, userPassword);
-    if (user) {
-      navigate("/");
-    }
   }
   function handleGoogleLogin() {
     userGoogleSignIn();
+  }
+
+  useEffect(() => {
     if (user) {
       navigate("/");
     }
-  }
+  }, [user, navigate]);
   return (
     <>
-      <UserForm title="Log In" buttonText="Log In" onSubmit={handleLogin}>
-        <Button onClick={handleGoogleLogin} type="button">
-          Sign in with Google
-        </Button>
-        <Link to="/register">Create your account here</Link>
-      </UserForm>
+      {isLoading ? (
+        <p>Logging you in ~</p>
+      ) : (
+        <UserForm title="Log In" buttonText="Log In" onSubmit={handleLogin}>
+          <Button onClick={handleGoogleLogin} type="button">
+            Sign in with Google
+          </Button>
+          <Link to="/register">Create your account here</Link>
+        </UserForm>
+      )}
     </>
   );
 }

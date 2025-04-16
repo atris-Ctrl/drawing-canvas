@@ -20,8 +20,8 @@ function Cursor({ canvasRef }) {
     if (!cursor) return;
     function updatePosition(e) {
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const x = e.clientX - rect.left + 2;
+      const y = e.clientY - rect.top + 2;
       cursor.style.transform = `translate3d(${x - cursor.clientWidth / 2}px, ${
         y - cursor.clientHeight / 2
       }px, 0)`;

@@ -12,14 +12,13 @@ import {
   where,
 } from "firebase/firestore";
 import { useAuth } from "../contexts/AuthProvider";
-import Footer from "../components/Footer";
 
-function HomePage() {
+function ToDoListPage() {
   const { user } = useAuth();
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState("");
   const db = getFirestore();
-  const myStyle = { backgroundImage: "url('/windowXP.jpg')" };
+
   useEffect(() => {
     if (user) {
       fetchTodos();
@@ -81,40 +80,37 @@ function HomePage() {
   }
 
   return (
-    <>
-      <div className="min-h-screen bg-[url('/windowXP-bliss.jpg')] bg-cover bg-center">
-        <h1>Your To-Do List</h1>
-        <div>
-          <input
-            type="text"
-            value={newTodo}
-            onChange={(e) => setNewTodo(e.target.value)}
-            placeholder="Add a new task"
-          />
-          <button onClick={handleAddTodo}>Add</button>
-        </div>
-        <ul>
-          {todos.map((todo) => (
-            <li
-              key={todo.id}
-              style={{
-                textDecoration: todo.completed ? "line-through" : "none",
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={todo.completed}
-                onChange={() => handleToggleComplete(todo.id, todo.completed)}
-              />
-              {todo.text}
-              <button onClick={() => handleDeleteTodo(todo.id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
+    <div>
+      <h1>Your To-Do List</h1>
+      <div>
+        <input
+          type="text"
+          value={newTodo}
+          onChange={(e) => setNewTodo(e.target.value)}
+          placeholder="Add a new task"
+        />
+        <button onClick={handleAddTodo}>Add</button>
       </div>
-      <Footer></Footer>
-    </>
+      <ul>
+        {todos.map((todo) => (
+          <li
+            key={todo.id}
+            style={{
+              textDecoration: todo.completed ? "line-through" : "none",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={todo.completed}
+              onChange={() => handleToggleComplete(todo.id, todo.completed)}
+            />
+            {todo.text}
+            <button onClick={() => handleDeleteTodo(todo.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
-export default HomePage;
+export default ToDoListPage;
