@@ -1,6 +1,6 @@
 import "../index.css";
 import { Link, useNavigate } from "react-router";
-import UserForm from "../components/UserForm";
+import UserForm from "../components/form/UserForm";
 import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthProvider";
 

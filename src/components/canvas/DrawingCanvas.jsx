@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useDraw } from "../contexts/DrawProvider";
-import Cursor from "./Cursor/Cursor";
+import { useDraw } from "../../contexts/DrawProvider";
+import Cursor from "../Cursor/Cursor";
 
 function getMousePos(canvas, e) {
   const rect = canvas.getBoundingClientRect();

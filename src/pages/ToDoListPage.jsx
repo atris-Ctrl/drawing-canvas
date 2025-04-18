@@ -12,6 +12,8 @@ import {
   where,
 } from "firebase/firestore";
 import { useAuth } from "../contexts/AuthProvider";
+import Window from "../components/desktop/Window";
+import Draggable, { DraggableCore } from "react-draggable";
 
 function ToDoListPage() {
   const { user } = useAuth();
@@ -80,36 +82,42 @@ function ToDoListPage() {
   }
 
   return (
-    <div>
-      <h1>Your To-Do List</h1>
+    <Draggable>
       <div>
-        <input
-          type="text"
-          value={newTodo}
-          onChange={(e) => setNewTodo(e.target.value)}
-          placeholder="Add a new task"
-        />
-        <button onClick={handleAddTodo}>Add</button>
-      </div>
-      <ul>
-        {todos.map((todo) => (
-          <li
-            key={todo.id}
-            style={{
-              textDecoration: todo.completed ? "line-through" : "none",
-            }}
-          >
+        <Window title="Your To-Do List">
+          <h1>Your To-Do List</h1>
+          <div>
             <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => handleToggleComplete(todo.id, todo.completed)}
+              type="text"
+              value={newTodo}
+              onChange={(e) => setNewTodo(e.target.value)}
+              placeholder="Add a new task"
             />
-            {todo.text}
-            <button onClick={() => handleDeleteTodo(todo.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+            <button onClick={handleAddTodo}>Add</button>
+          </div>
+          <ul>
+            {todos.map((todo) => (
+              <li
+                key={todo.id}
+                style={{
+                  textDecoration: todo.completed ? "line-through" : "none",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() => handleToggleComplete(todo.id, todo.completed)}
+                />
+                {todo.text}
+                <button onClick={() => handleDeleteTodo(todo.id)}>
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        </Window>
+      </div>
+    </Draggable>
   );
 }
 

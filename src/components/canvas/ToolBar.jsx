@@ -1,8 +1,8 @@
-import { useDraw } from "../contexts/DrawProvider";
-import Button from "./styleComponent/Button";
-import ColorPicker from "./colors/ColorPicker";
-import GradientDiv from "./styleComponent/GradientDiv";
-import StickersPlane from "./stickers/StickersPlane";
+import { useDraw } from "../../contexts/DrawProvider";
+import Button from "../ui/Button";
+import ColorPicker from "../colors/ColorPicker";
+import GradientDiv from "../ui/GradientDiv";
+import StickersPlane from "../stickers/StickersPlane";
 import "xp.css/dist/XP.css";
 function ToolBar({ onVisible }) {
   const {

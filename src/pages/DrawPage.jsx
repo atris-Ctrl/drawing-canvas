@@ -1,10 +1,10 @@
 import { useState } from "react";
 import "../App.css";
-import Button from "../components/styleComponent/Button";
-import DrawingCanvas from "../components/DrawingCanvas";
+import Button from "../components/ui/Button";
+import DrawingCanvas from "../components/canvas/DrawingCanvas";
 import { DrawProvider } from "../contexts/DrawProvider";
-import ToolBar from "../components/ToolBar";
-import Header from "../components/Header";
+import ToolBar from "../components/canvas/ToolBar";
+import Header from "../components/ui/Header";
 
 function DrawApp() {
   const [isVisible, setIsVisible] = useState(true);
@@ -15,9 +15,9 @@ function DrawApp() {
   };
 
   return (
-    <div>
+    <div className="">
       <Header />
-      <div className="layout-div flex flex-row h-screen">
+      <div className="flex flex-row">
         <DrawProvider>
           {isVisible ? (
             <ToolBar onVisible={setIsVisible} />
@@ -28,7 +28,7 @@ function DrawApp() {
               </Button>
             </div>
           )}
-          <div className="canvas-div h-screen">
+          <div className="h-full">
             <DrawingCanvas dimensions={dimensions} />
           </div>
         </DrawProvider>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Button from "./styleComponent/Button";
+import Button from "../ui/Button";
 import "xp.css/dist/XP.css";
 function UserForm({
   title,
