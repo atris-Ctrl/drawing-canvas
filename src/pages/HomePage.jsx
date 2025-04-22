@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import Chicken from "../components/chicken/Chicken";
-import Footer from "../components/ui/Footer";
+import Footer from "../ui/Footer";
 import DesktopIcon from "../components/desktop/DesktopIcon";
 import ToDoListPage from "./ToDoListPage";
 import CommandPrompt from "../components/desktop/CommandPrompt";
@@ -40,6 +40,10 @@ function DesktopApps() {
       <div className="flex flex-col gap-10">
         <DesktopIcon iconSrc="/assets/vice_leader_circus.png" label="Mouse" />
         <DesktopIcon iconSrc="/assets/vice_leader_circus.png" label="Mouse" />
+        <DesktopIcon
+          iconSrc="/assets/icons/user_account.ico"
+          label="User Account"
+        />
       </div>
       <DesktopIcon iconSrc="/assets/vice_leader_circus.png" label="Mouse" />
     </div>

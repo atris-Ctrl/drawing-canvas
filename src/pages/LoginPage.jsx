@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useAuth } from "../contexts/AuthProvider";
 import { Link, useNavigate } from "react-router";
 import UserForm from "../components/form/UserForm";
-import Button from "../components/ui/Button";
+import Button from "../ui/Button";
 
 function LoginPage() {
   const { user, isLoading, userLogin, userGoogleSignIn } = useAuth();

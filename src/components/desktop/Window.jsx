@@ -11,7 +11,7 @@ function Window({ title = "Window", children, style, onClick, className }) {
           <button onClick={onClick} aria-label="Close"></button>
         </div>
       </div>
-      <div class="window-body">{children}</div>
+      <div className="window-body">{children}</div>
     </div>
   );
 }

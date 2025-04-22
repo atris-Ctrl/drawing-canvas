@@ -1,10 +1,10 @@
 import { useState } from "react";
 import "../App.css";
-import Button from "../components/ui/Button";
+import Button from "../ui/Button";
 import DrawingCanvas from "../components/canvas/DrawingCanvas";
 import { DrawProvider } from "../contexts/DrawProvider";
 import ToolBar from "../components/canvas/ToolBar";
-import Header from "../components/ui/Header";
+import Header from "../ui/Header";
 
 function DrawApp() {
   const [isVisible, setIsVisible] = useState(true);

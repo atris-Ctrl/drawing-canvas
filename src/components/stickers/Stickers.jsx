@@ -15,12 +15,11 @@ function Stickers() {
 function Sticker({ imgSrc }) {
   const { setSticker } = useDraw();
   function handleClick() {
-    console.log("hello");
     setSticker("hello");
   }
   return (
     <div onClick={handleClick} className="flex flex-col text-center">
-      <img src="/stickers/chicken_crown.png"></img>
+      <img src="/assets/chicken_crown.png"></img>
     </div>
   );
 }

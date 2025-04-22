@@ -1,6 +1,8 @@
+import { useState } from "react";
 import Draggable from "react-draggable";
 
 function CommandPrompt() {
+  const [command, setCommand] = useState("");
   return (
     <Draggable>
       <div className="window w-fit h-fit">
@@ -20,6 +22,11 @@ function CommandPrompt() {
               C:/WINDOWS/SYSTEM32 You can build a command line easily with a
               window and pre tag
             </p>
+            <input
+              className="bg-black"
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+            />
           </pre>
         </div>
       </div>
