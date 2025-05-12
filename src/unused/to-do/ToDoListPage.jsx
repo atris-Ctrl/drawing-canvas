@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 import {
   getFirestore,
   collection,
@@ -10,15 +10,15 @@ import {
   deleteDoc,
   query,
   where,
-} from "firebase/firestore";
-import { useAuth } from "../contexts/AuthProvider";
-import Window from "../components/desktop/Window";
-import Draggable, { DraggableCore } from "react-draggable";
+} from 'firebase/firestore';
+import { useAuth } from '../authentication/AuthProvider';
+import Window from '../../components/desktop/Window';
+import Draggable, { DraggableCore } from 'react-draggable';
 
 function ToDoListPage() {
   const { user } = useAuth();
   const [todos, setTodos] = useState([]);
-  const [newTodo, setNewTodo] = useState("");
+  const [newTodo, setNewTodo] = useState('');
   const db = getFirestore();
 
   useEffect(() => {
@@ -29,7 +29,7 @@ function ToDoListPage() {
 
   const fetchTodos = async () => {
     try {
-      const userTodosRef = collection(db, "todos", user.uid, "items");
+      const userTodosRef = collection(db, 'todos', user.uid, 'items');
       const querySnapshot = await getDocs(userTodosRef);
       const todosData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -37,43 +37,43 @@ function ToDoListPage() {
       }));
       setTodos(todosData);
     } catch (error) {
-      console.error("Error fetching todos:", error);
+      console.error('Error fetching todos:', error);
     }
   };
 
   const handleAddTodo = async () => {
-    if (newTodo.trim() === "") return;
+    if (newTodo.trim() === '') return;
 
     try {
-      const userTodosRef = collection(db, "todos", user.uid, "items");
+      const userTodosRef = collection(db, 'todos', user.uid, 'items');
       await addDoc(userTodosRef, {
         text: newTodo,
         completed: false,
       });
-      setNewTodo("");
+      setNewTodo('');
       fetchTodos();
     } catch (error) {
-      console.error("Error adding todo:", error);
+      console.error('Error adding todo:', error);
     }
   };
 
   const handleToggleComplete = async (todoId, completed) => {
     try {
-      const userTodoRef = doc(db, "todos", user.uid, "items", todoId);
+      const userTodoRef = doc(db, 'todos', user.uid, 'items', todoId);
       await updateDoc(userTodoRef, { completed: !completed });
       fetchTodos();
     } catch (error) {
-      console.error("Error updating todo:", error);
+      console.error('Error updating todo:', error);
     }
   };
 
   const handleDeleteTodo = async (todoId) => {
     try {
-      const userTodoRef = doc(db, "todos", user.uid, "items", todoId);
+      const userTodoRef = doc(db, 'todos', user.uid, 'items', todoId);
       await deleteDoc(userTodoRef);
       fetchTodos();
     } catch (error) {
-      console.error("Error deleting todo:", error);
+      console.error('Error deleting todo:', error);
     }
   };
 
@@ -100,7 +100,7 @@ function ToDoListPage() {
               <li
                 key={todo.id}
                 style={{
-                  textDecoration: todo.completed ? "line-through" : "none",
+                  textDecoration: todo.completed ? 'line-through' : 'none',
                 }}
               >
                 <input

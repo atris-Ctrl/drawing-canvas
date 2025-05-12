@@ -1,14 +1,14 @@
-import { useEffect } from "react";
-import { useAuth } from "../contexts/AuthProvider";
-import { Link, useNavigate } from "react-router";
-import UserForm from "../components/form/UserForm";
-import Button from "../ui/Button";
+import { useEffect } from 'react';
+import { useAuth } from './AuthProvider';
+import { Link, useNavigate } from 'react-router';
+import UserForm from '../../components/form/UserForm';
+import Button from '../../ui/Button';
 
 function LoginPage() {
   const { user, isLoading, userLogin, userGoogleSignIn } = useAuth();
   const navigate = useNavigate();
   function handleLogin(userEmail, userPassword) {
-    if (userEmail === "" || userPassword === "") return;
+    if (userEmail === '' || userPassword === '') return;
     userLogin(userEmail, userPassword);
   }
   function handleGoogleLogin() {
@@ -17,7 +17,7 @@ function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      navigate("/");
+      navigate('/');
     }
   }, [user, navigate]);
   return (
