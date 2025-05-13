@@ -1,5 +1,4 @@
 import { useReducer, useEffect } from 'react';
-import Window from '../components/desktop/Window';
 import {
   flagPaths,
   numberPaths,
@@ -8,9 +7,10 @@ import {
   isWithinBound,
   countMine,
   placeMine,
+  CellStates,
 } from './config';
 import '../winxp/theme.min.css';
-// public\styles\winxp\theme.css
+
 function initBoard(level) {
   const N_ROW = settings[level].N_ROW;
   const N_COL = settings[level].N_COL;
@@ -20,9 +20,9 @@ function initBoard(level) {
       return { count: 0, isMine: false, isRevealed: false };
     });
   }
-  placeMine(board, level);
+  const mineCoords = placeMine(board, level);
   countMine(board, level);
-  return board;
+  return { board, mineCoords };
 }
 function WindowWithMenu({ dispatch, children }) {
   return (
@@ -71,9 +71,6 @@ function WindowWithMenu({ dispatch, children }) {
               >
                 Expert
               </li>
-
-              <li role="separator" className="my-1 border-t"></li>
-              <li tabIndex="0">Quit</li>
             </ul>
           </li>
           <li
@@ -87,7 +84,6 @@ function WindowWithMenu({ dispatch, children }) {
               className="absolute left-0 top-full hidden border border-gray-400 bg-white p-1 group-hover:block group-focus:block"
             >
               <li tabIndex="0">Github</li>
-              <li tabIndex="0">Quit</li>
             </ul>
           </li>
         </ul>
@@ -99,7 +95,8 @@ function WindowWithMenu({ dispatch, children }) {
 }
 const initialState = {
   level: 'beginner',
-  board: initBoard('beginner'),
+  board: [],
+  mineCoords: [],
   revealed: new Set(),
   flagged: new Set(),
   settings: {},
@@ -107,11 +104,28 @@ const initialState = {
   time: 0,
 };
 
+function initializeState(level) {
+  const { board, mineCoords } = initBoard(level);
+  return {
+    ...initialState,
+    level,
+    board,
+    mineCoords,
+  };
+}
+
 function reducer(state, action) {
   switch (action.type) {
     case 'REVEAL_CELL':
       const { row, col } = action.payload;
-      const { board, revealed, gameState, flagged, level } = state;
+      const {
+        board,
+        revealed,
+        gameState,
+        flagged,
+        level,
+        mineCoords: revealMineCoords,
+      } = state;
       let newGameState = gameState;
       if (gameState === 'start') {
         newGameState = 'running';
@@ -145,11 +159,7 @@ function reducer(state, action) {
         visited.add(key);
 
         if (cell.isMine) {
-          board.forEach((row, i) => {
-            row.forEach((cell, j) => {
-              if (cell.isMine) newRevealed.add(`${i},${j}`);
-            });
-          });
+          revealMineCoords.forEach((coords) => newRevealed.add(coords));
 
           return { ...state, gameState: 'over', revealed: newRevealed };
         }
@@ -190,18 +200,23 @@ function reducer(state, action) {
 
     case 'RESET_GAME':
       const currentLevel = state.level;
-
+      const { board: newBoard, mineCoords } = initBoard(currentLevel);
       return {
         ...initialState,
-        board: initBoard(currentLevel),
+        board: newBoard,
+        mineCoords,
         level: currentLevel,
       };
 
     case 'CHANGE_LEVEL':
+      const newLevel = action.payload;
+      const newLevelBoardState = initBoard(newLevel);
+
       return {
         ...initialState,
-        level: action.payload,
-        board: initBoard(action.payload),
+        level: newLevel,
+        board: newLevelBoardState.board,
+        mineCoords: newLevelBoardState.mineCoords,
       };
     case 'TICK':
       if (state.gameState === 'running')
@@ -220,8 +235,8 @@ const sunkenBorderStyle =
   'border-b-2 border-l-2 border-r-2 border-t-2 border-b-white border-l-[#7a7a7a] border-r-white border-t-[#7a7a7a]';
 
 function MineSweeper() {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { board, level, revealed, flagged, gameState, time } = state;
+  const [state, dispatch] = useReducer(reducer, initializeState('beginner'));
+  const { board, level, flagged, gameState, time } = state;
   const { N_ROW, N_BOMBS } = settings[level];
   const fixedArrayRow = Array.from(Array(N_ROW).keys());
   const remainingBombs = N_BOMBS - flagged.size;
@@ -241,15 +256,7 @@ function MineSweeper() {
           </div>
           <div className={`inline-block w-full ${sunkenBorderStyle}`}>
             {fixedArrayRow.map((row) => (
-              <Row
-                board={board}
-                level={level}
-                key={row}
-                row={row}
-                dispatch={dispatch}
-                revealed={revealed}
-                flagged={flagged}
-              />
+              <Row key={row} row={row} dispatch={dispatch} boardState={state} />
             ))}
           </div>
         </div>
@@ -292,9 +299,9 @@ function EmojiButton({ gameState, dispatch }) {
     </div>
   );
 }
-function Row({ row, revealed, dispatch, board, flagged, level }) {
+function Row({ row, boardState, dispatch }) {
+  const { revealed, flagged, board, level } = boardState;
   const { N_COL } = settings[level];
-
   const fixedArrayCol = Array.from(Array(N_COL).keys());
   return (
     <div className="flex">
@@ -303,24 +310,18 @@ function Row({ row, revealed, dispatch, board, flagged, level }) {
         return (
           <Cell
             key={key}
-            isRevealed={revealed.has(key)}
-            dispatch={dispatch}
             row={row}
             col={col}
-            board={board}
+            isRevealed={revealed.has(key)}
             isFlagged={flagged.has(key)}
+            dispatch={dispatch}
+            board={board}
           />
         );
       })}
     </div>
   );
 }
-
-const CellStates = {
-  FLAG: 'flag',
-  BOMB: 'bomb',
-  EMPTY: 'empty',
-};
 
 function Cell({ row, col, isRevealed, dispatch, board, isFlagged }) {
   const cell = board[row][col];

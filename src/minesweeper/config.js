@@ -1,6 +1,12 @@
 const flagPath = 'assets/minesweeper/flag';
 const emojiPath = 'assets/minesweeper/emoji';
 const numberPath = 'assets/minesweeper/number';
+export const CellStates = {
+  FLAG: 'flag',
+  BOMB: 'bomb',
+  EMPTY: 'empty',
+};
+
 export const settings = {
   beginner: {
     N_ROW: 8,
@@ -102,8 +108,10 @@ function shuffle(arr) {
 
 export function placeMine(board, level) {
   const { N_ROW, N_COL, N_BOMBS } = settings[level];
+
   const size = N_ROW * N_COL;
   let order = new Array(size);
+  const mineCoords = [];
 
   for (let i = 0; i < size; i++) {
     order[i] = i;
@@ -114,5 +122,7 @@ export function placeMine(board, level) {
     row = Math.floor(order[i] / N_COL);
     col = order[i] % N_COL;
     board[row][col].isMine = true;
+    mineCoords.push(`${row}, ${col}`);
   }
+  return mineCoords;
 }
