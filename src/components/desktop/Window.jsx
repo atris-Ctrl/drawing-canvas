@@ -1,5 +1,4 @@
 import Draggable from 'react-draggable';
-
 function Window({
   title = 'Window',
   icon,

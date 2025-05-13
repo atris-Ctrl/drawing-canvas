@@ -1,7 +1,16 @@
 import { useReducer, useEffect } from 'react';
 import Window from '../components/desktop/Window';
-import { flagPaths, numberPaths, settings, emojiPaths } from './config';
-
+import {
+  flagPaths,
+  numberPaths,
+  settings,
+  emojiPaths,
+  isWithinBound,
+  countMine,
+  placeMine,
+} from './config';
+import '../winxp/theme.min.css';
+// public\styles\winxp\theme.css
 function initBoard(level) {
   const N_ROW = settings[level].N_ROW;
   const N_COL = settings[level].N_COL;
@@ -15,65 +24,79 @@ function initBoard(level) {
   countMine(board, level);
   return board;
 }
-function isMine(board, row, col) {
-  const N_ROW = board.length;
-  const N_COL = board[0].length;
-  if (!isWithinBound(row, col, N_ROW, N_COL)) return false;
-  if (board[row][col].isMine) {
-    return true;
-  }
-  return false;
-}
-function isWithinBound(row, col, N_ROW, N_COL) {
-  if (row < 0 || col < 0 || row >= N_ROW || col >= N_COL) return false;
-  return true;
-}
+function WindowWithMenu({ dispatch, children }) {
+  return (
+    <div className="window active inline-block">
+      <div className="title-bar">
+        <div className="title-bar-text">Window Title</div>
+        <div className="title-bar-buttons">
+          <button data-minimize="" />
+          <button data-maximize="" />
+          <button data-close="" />
+        </div>
+      </div>
+      <div className="window-body">
+        <ul role="menubar" className="flex">
+          <li
+            tabIndex="0"
+            aria-haspopup={true}
+            className="group relative cursor-pointer"
+          >
+            <u>S</u>ettings
+            <ul
+              role="menu"
+              className="absolute left-0 top-full hidden border border-gray-400 bg-white p-1 group-hover:block group-focus:block"
+            >
+              <li
+                tabIndex="0"
+                onClick={() =>
+                  dispatch({ type: 'CHANGE_LEVEL', payload: 'beginner' })
+                }
+              >
+                Beginner
+              </li>
+              <li
+                tabIndex="0"
+                onClick={() =>
+                  dispatch({ type: 'CHANGE_LEVEL', payload: 'intermediate' })
+                }
+              >
+                Intermediate
+              </li>
+              <li
+                tabIndex="0"
+                onClick={() =>
+                  dispatch({ type: 'CHANGE_LEVEL', payload: 'expert' })
+                }
+              >
+                Expert
+              </li>
 
-function countMine(board, level) {
-  const { N_ROW, N_COL } = settings[level];
-  for (let i = 0; i < N_ROW; i++) {
-    for (let j = 0; j < N_COL; j++) {
-      const count =
-        isMine(board, i - 1, j - 1) +
-        isMine(board, i - 1, j) +
-        isMine(board, i - 1, j + 1) +
-        isMine(board, i, j - 1) +
-        isMine(board, i, j + 1) +
-        isMine(board, i + 1, j - 1) +
-        isMine(board, i + 1, j) +
-        isMine(board, i + 1, j + 1);
-      board[i][j].count = count;
-    }
-  }
+              <li role="separator" className="my-1 border-t"></li>
+              <li tabIndex="0">Quit</li>
+            </ul>
+          </li>
+          <li
+            tabIndex="0"
+            aria-haspopup={true}
+            className="group relative cursor-pointer"
+          >
+            <u>H</u>elp
+            <ul
+              role="menu"
+              className="absolute left-0 top-full hidden border border-gray-400 bg-white p-1 group-hover:block group-focus:block"
+            >
+              <li tabIndex="0">Github</li>
+              <li tabIndex="0">Quit</li>
+            </ul>
+          </li>
+        </ul>
+
+        <div className="padding">{children}</div>
+      </div>
+    </div>
+  );
 }
-
-function placeMine(board, level) {
-  const { N_ROW, N_COL, N_BOMBS } = settings[level];
-  const size = N_ROW * N_COL;
-  let order = new Array(size);
-
-  for (let i = 0; i < size; i++) {
-    order[i] = i;
-  }
-  shuffle(order);
-  let row, col;
-  for (let i = 0; i < N_BOMBS; i++) {
-    row = Math.floor(order[i] / N_COL);
-    col = order[i] % N_COL;
-    board[row][col].isMine = true;
-  }
-}
-
-function shuffle(arr) {
-  let i, j, temp;
-  for (i = arr.length - 1; i > 0; i--) {
-    j = Math.floor(Math.random(i + 1) * arr.length);
-    temp = arr[j];
-    arr[j] = arr[i];
-    arr[i] = temp;
-  }
-}
-
 const initialState = {
   level: 'beginner',
   board: initBoard('beginner'),
@@ -93,7 +116,7 @@ function reducer(state, action) {
       if (gameState === 'start') {
         newGameState = 'running';
       }
-      const { N_ROW: numRows, N_COL: numCols } = settings[level];
+      const { N_ROW: numRows, N_COL: numCols, N_BOMBS } = settings[level];
       const key = `${row},${col}`;
       if (gameState === 'over' || revealed.has(key) || flagged.has(key))
         return state;
@@ -104,7 +127,7 @@ function reducer(state, action) {
       const queue = [[row, col]];
 
       while (queue.length > 0) {
-        const [r, c] = queue.shift();
+        const [r, c] = queue.pop();
         const key = `${r},${c}`;
 
         if (
@@ -121,9 +144,15 @@ function reducer(state, action) {
         }
         visited.add(key);
 
-        if (cell.isMine)
-          return { ...state, gameState: 'over', revealed: newRevealed };
+        if (cell.isMine) {
+          board.forEach((row, i) => {
+            row.forEach((cell, j) => {
+              if (cell.isMine) newRevealed.add(`${i},${j}`);
+            });
+          });
 
+          return { ...state, gameState: 'over', revealed: newRevealed };
+        }
         if (cell.count === 0 && !cell.isMine) {
           for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
@@ -133,6 +162,11 @@ function reducer(state, action) {
         }
       }
 
+      const totalCells = numRows * numCols;
+      const revealedCells = newRevealed.size;
+      const isWin = revealedCells === totalCells - N_BOMBS;
+      if (isWin)
+        return { ...state, gameState: isWin ? 'won' : state.gameState };
       return {
         ...state,
         revealed: newRevealed,
@@ -146,7 +180,6 @@ function reducer(state, action) {
       const toggleKey = `${toggleRow},${toggleCol}`;
       if (state.revealed.has(toggleKey)) return state;
       const newFlaggedFlag = new Set(state.flagged);
-
       if (newFlaggedFlag.has(toggleKey)) {
         newFlaggedFlag.delete(toggleKey);
       } else {
@@ -156,23 +189,32 @@ function reducer(state, action) {
       return { ...state, flagged: newFlaggedFlag };
 
     case 'RESET_GAME':
-      return { ...initialState, board: initBoard(state.level) };
+      const currentLevel = state.level;
 
+      return {
+        ...initialState,
+        board: initBoard(currentLevel),
+        level: currentLevel,
+      };
+
+    case 'CHANGE_LEVEL':
+      return {
+        ...initialState,
+        level: action.payload,
+        board: initBoard(action.payload),
+      };
     case 'TICK':
       if (state.gameState === 'running')
         return { ...state, time: state.time + 1 };
       return state;
-    case 'CHECK_WIN':
-      const totalCells = N_ROW * N_COL;
-      const revealedCells = revealed.size;
-      const isWin = revealedCells === totalCells - N_BOMBS;
-      return { ...state, gameState: isWin ? 'won' : state.gameState };
+
     default:
       throw new Error('Unknown action');
   }
 }
+
 const borderStyle =
-  'border-b-2 border-l-2 border-r-2 border-t-2 border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white';
+  'border-b-4 border-l-4 border-r-4 border-t-4 border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white';
 
 const sunkenBorderStyle =
   'border-b-2 border-l-2 border-r-2 border-t-2 border-b-white border-l-[#7a7a7a] border-r-white border-t-[#7a7a7a]';
@@ -180,40 +222,39 @@ const sunkenBorderStyle =
 function MineSweeper() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { board, level, revealed, flagged, gameState, time } = state;
-  const { N_ROW, N_COL, N_BOMBS } = settings[level];
-  const fixedArrayRow = Array.from(Array(N_COL).keys());
+  const { N_ROW, N_BOMBS } = settings[level];
+  const fixedArrayRow = Array.from(Array(N_ROW).keys());
   const remainingBombs = N_BOMBS - flagged.size;
+
   return (
-    <Window icon="/assets/minesweeper/mine.png" title="Minesweeper">
-      <div
-        className={`flex flex-col items-center bg-[#c0c0c0] p-2 ${sunkenBorderStyle}`}
-      >
+    <>
+      <WindowWithMenu dispatch={dispatch}>
         <div
-          className={`space-between flex bg-gray-300 px-3 py-1 ${sunkenBorderStyle}`}
+          className={`flex flex-col items-center gap-2 bg-[#c0c0c0] p-2 ${borderStyle}`}
         >
-          <NumberStyle number={remainingBombs}></NumberStyle>
           <div
-            className={borderStyle}
-            onClick={() => dispatch({ type: 'RESET_GAME' })}
+            className={`space-between flex w-full gap-2 bg-gray-300 px-3.5 py-1 ${sunkenBorderStyle}`}
           >
-            <img src={emojiPaths.smile}></img>
+            <NumberStyle number={remainingBombs} />
+            <EmojiButton gameState={gameState} dispatch={dispatch} />
+            <StopWatch gameState={gameState} dispatch={dispatch} time={time} />
           </div>
-          <StopWatch gameState={gameState} dispatch={dispatch} time={time} />
+          <div className={`inline-block w-full ${sunkenBorderStyle}`}>
+            {fixedArrayRow.map((row) => (
+              <Row
+                board={board}
+                level={level}
+                key={row}
+                row={row}
+                dispatch={dispatch}
+                revealed={revealed}
+                flagged={flagged}
+              />
+            ))}
+          </div>
         </div>
-        <div className="inline-block">
-          {fixedArrayRow.map((row) => (
-            <Row
-              board={board}
-              key={row}
-              row={row}
-              dispatch={dispatch}
-              revealed={revealed}
-              flagged={flagged}
-            />
-          ))}
-        </div>
-      </div>
-    </Window>
+      </WindowWithMenu>
+    </>
   );
 }
 
@@ -225,16 +266,36 @@ function StopWatch({ gameState, dispatch, time }) {
     return () => clearInterval(timer);
   }, [gameState]);
 
+  return <NumberStyle number={time} />;
+}
+
+function EmojiButton({ gameState, dispatch }) {
+  const emoji = (() => {
+    switch (gameState) {
+      case 'idle':
+        return emojiPaths.smile;
+      case 'over':
+        return emojiPaths.dead;
+      case '?':
+        return emojiPaths.ohh;
+      default:
+        return emojiPaths.smile;
+    }
+  })();
+
   return (
-    <div>
-      <NumberStyle number={time} />
+    <div
+      className={`${borderStyle} m-1 flex h-7 w-7 items-center justify-center active:bg-[#7a7a7a]`}
+      onClick={() => dispatch({ type: 'RESET_GAME' })}
+    >
+      <img src={emoji} alt="emoji" />
     </div>
   );
 }
+function Row({ row, revealed, dispatch, board, flagged, level }) {
+  const { N_COL } = settings[level];
 
-function Row({ row, revealed, dispatch, board, flagged }) {
-  const N_ROW = board.length;
-  const fixedArrayCol = Array.from(Array(N_ROW).keys());
+  const fixedArrayCol = Array.from(Array(N_COL).keys());
   return (
     <div className="flex">
       {fixedArrayCol.map((col) => {
@@ -282,12 +343,12 @@ function Cell({ row, col, isRevealed, dispatch, board, isFlagged }) {
     <div
       onContextMenu={handleRightClick}
       onClick={handleClick}
-      className={`flex h-4 w-4 select-none items-center justify-center ${
+      className={`flex h-5 w-5 select-none items-center justify-center active:bg-[#7a7a7a] ${
         isRevealed ? 'border-[1px] border-[#7a7a7a]' : borderStyle
       }`}
     >
       {isRevealed && (
-        <img src={flagPaths[content]} alt={content} className="h-3 w-3" />
+        <img src={flagPaths[content]} alt={content} className="h-4 w-4" />
       )}
       {isFlagged && <img src={flagPaths[content]} alt="flag"></img>}
     </div>
@@ -296,7 +357,7 @@ function Cell({ row, col, isRevealed, dispatch, board, isFlagged }) {
 function NumberStyle({ number }) {
   let numberStr = String(number).padStart(3, '0');
   return (
-    <div className="flex">
+    <div className={`flex ${sunkenBorderStyle}`}>
       <img src={numberPaths[numberStr[0]]} />
       <img src={numberPaths[numberStr[1]]} />
       <img src={numberPaths[numberStr[2]]} />

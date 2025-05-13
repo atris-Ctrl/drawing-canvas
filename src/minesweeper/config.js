@@ -13,8 +13,8 @@ export const settings = {
     N_BOMBS: 40,
   },
   expert: {
-    N_ROW: 30,
-    N_COL: 16,
+    N_ROW: 16,
+    N_COL: 30,
     N_BOMBS: 99,
   },
 };
@@ -54,4 +54,65 @@ export const flagPaths = {
   flag: `${flagPath}/flag.png`,
   bomb: `${flagPath}/mine2.png`,
   empty: `${flagPath}/empty.png`,
+  bombEnd: `${flagPath}/mine-death.png`,
 };
+
+export function isWithinBound(row, col, N_ROW, N_COL) {
+  if (row < 0 || col < 0 || row >= N_ROW || col >= N_COL) return false;
+  return true;
+}
+
+function isMine(board, row, col) {
+  const N_ROW = board.length;
+  const N_COL = board[0].length;
+  if (!isWithinBound(row, col, N_ROW, N_COL)) return false;
+  if (board[row][col].isMine) {
+    return true;
+  }
+  return false;
+}
+
+export function countMine(board, level) {
+  const { N_ROW, N_COL } = settings[level];
+  for (let i = 0; i < N_ROW; i++) {
+    for (let j = 0; j < N_COL; j++) {
+      const count =
+        isMine(board, i - 1, j - 1) +
+        isMine(board, i - 1, j) +
+        isMine(board, i - 1, j + 1) +
+        isMine(board, i, j - 1) +
+        isMine(board, i, j + 1) +
+        isMine(board, i + 1, j - 1) +
+        isMine(board, i + 1, j) +
+        isMine(board, i + 1, j + 1);
+      board[i][j].count = count;
+    }
+  }
+}
+
+function shuffle(arr) {
+  let i, j, temp;
+  for (i = arr.length - 1; i > 0; i--) {
+    j = Math.floor(Math.random(i + 1) * arr.length);
+    temp = arr[j];
+    arr[j] = arr[i];
+    arr[i] = temp;
+  }
+}
+
+export function placeMine(board, level) {
+  const { N_ROW, N_COL, N_BOMBS } = settings[level];
+  const size = N_ROW * N_COL;
+  let order = new Array(size);
+
+  for (let i = 0; i < size; i++) {
+    order[i] = i;
+  }
+  shuffle(order);
+  let row, col;
+  for (let i = 0; i < N_BOMBS; i++) {
+    row = Math.floor(order[i] / N_COL);
+    col = order[i] % N_COL;
+    board[row][col].isMine = true;
+  }
+}
