@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useState } from 'react';
+import { useReducer, useEffect } from 'react';
 import Window from '../components/desktop/Window';
 import { flagPaths, numberPaths, settings, emojiPaths } from './config';
 
@@ -95,7 +95,7 @@ function reducer(state, action) {
       }
       const { N_ROW: numRows, N_COL: numCols } = settings[level];
       const key = `${row},${col}`;
-      if (gameState === 'over' || revealed.has(key) || flagged.has(key))
+      if (gameState !== 'running' || revealed.has(key) || flagged.has(key))
         return state;
 
       const newRevealed = new Set(revealed);
@@ -132,9 +132,10 @@ function reducer(state, action) {
       return { ...state, revealed: newRevealed, gameState: newGameState };
 
     case 'TOGGLE_FLAG':
+      if (state.gameState !== 'running') return state;
       const { row: toggleRow, col: toggleCol } = action.payload;
       const toggleKey = `${toggleRow},${toggleCol}`;
-      const newFlagged = new Set(flagged);
+      const newFlagged = new Set(state.flagged);
 
       if (newFlagged.has(toggleKey)) {
         newFlagged.delete(toggleKey);
@@ -163,6 +164,9 @@ function reducer(state, action) {
 const borderStyle =
   'border-b-2 border-l-2 border-r-2 border-t-2 border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white';
 
+const sunkenBorderStyle =
+  'border-b-2 border-l-2 border-r-2 border-t-2 border-b-white border-l-[#7a7a7a] border-r-white border-t-[#7a7a7a]';
+
 function MineSweeper() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { board, level, revealed, flagged, gameState, time } = state;
@@ -172,10 +176,10 @@ function MineSweeper() {
   return (
     <Window icon="/assets/minesweeper/mine.png" title="Minesweeper">
       <div
-        className={`flex flex-col items-center bg-[#c0c0c0] p-2 ${borderStyle}`}
+        className={`flex flex-col items-center bg-[#c0c0c0] p-2 ${sunkenBorderStyle}`}
       >
         <div
-          className={`space-between flex bg-gray-300 px-3 py-1 ${borderStyle}`}
+          className={`space-between flex bg-gray-300 px-3 py-1 ${sunkenBorderStyle}`}
         >
           <NumberStyle number={remainingBombs}></NumberStyle>
           <div
@@ -194,6 +198,7 @@ function MineSweeper() {
               row={row}
               dispatch={dispatch}
               revealed={revealed}
+              flagged={flagged}
             />
           ))}
         </div>
@@ -217,19 +222,7 @@ function StopWatch({ gameState, dispatch, time }) {
   );
 }
 
-function NumberStyle({ number }) {
-  let numberStr = String(number).padStart(3, '0');
-  console.log(numberStr);
-  return (
-    <div className="flex">
-      <img src={numberPaths[numberStr[0]]} />
-      <img src={numberPaths[numberStr[1]]} />
-      <img src={numberPaths[numberStr[2]]} />
-    </div>
-  );
-}
-
-function Row({ row, revealed, dispatch, board }) {
+function Row({ row, revealed, dispatch, board, flagged }) {
   const N_ROW = board.length;
   const fixedArrayCol = Array.from(Array(N_ROW).keys());
   return (
@@ -244,6 +237,7 @@ function Row({ row, revealed, dispatch, board }) {
             row={row}
             col={col}
             board={board}
+            isFlagged={flagged.has(key)}
           />
         );
       })}
@@ -251,34 +245,52 @@ function Row({ row, revealed, dispatch, board }) {
   );
 }
 
+const CellStates = {
+  FLAG: 'flag',
+  BOMB: 'bomb',
+  EMPTY: 'empty',
+};
+
 function Cell({ row, col, isRevealed, dispatch, board, isFlagged }) {
   const cell = board[row][col];
+  let content;
+  if (isFlagged) {
+    content = CellStates.FLAG;
+  } else {
+    content = cell.isMine ? CellStates.BOMB : cell.count || CellStates.EMPTY;
+  }
 
-  const content = cell.isMine ? 'bomb' : cell.count || 'empty';
   function handleRightClick(e) {
     e.preventDefault();
     dispatch({ type: 'TOGGLE_FLAG', payload: { row, col } });
   }
-  function handleClick(row, col) {
+  function handleClick() {
     dispatch({ type: 'REVEAL_CELL', payload: { row, col } });
   }
 
   return (
     <div
       onContextMenu={handleRightClick}
-      onClick={() => handleClick(row, col)}
+      onClick={handleClick}
       className={`flex h-4 w-4 select-none items-center justify-center ${
-        isRevealed
-          ? 'border-[1px] border-[#7a7a7a]'
-          : 'border-b-2 border-l-2 border-r-2 border-t-2 border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white bg-gray-300'
-      } `}
+        isRevealed || isFlagged ? 'border-[1px] border-[#7a7a7a]' : borderStyle
+      }`}
     >
       {isRevealed && (
         <img src={flagPaths[content]} alt={content} className="h-3 w-3" />
       )}
-      {isFlagged && <img src={flagPaths[content]}></img>}
+      {isFlagged && <img src={flagPaths['flagged']} alt="flag"></img>}
     </div>
   );
 }
-
+function NumberStyle({ number }) {
+  let numberStr = String(number).padStart(3, '0');
+  return (
+    <div className="flex">
+      <img src={numberPaths[numberStr[0]]} />
+      <img src={numberPaths[numberStr[1]]} />
+      <img src={numberPaths[numberStr[2]]} />
+    </div>
+  );
+}
 export default MineSweeper;
