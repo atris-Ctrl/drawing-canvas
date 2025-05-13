@@ -95,10 +95,11 @@ function reducer(state, action) {
       }
       const { N_ROW: numRows, N_COL: numCols } = settings[level];
       const key = `${row},${col}`;
-      if (gameState !== 'running' || revealed.has(key) || flagged.has(key))
+      if (gameState === 'over' || revealed.has(key) || flagged.has(key))
         return state;
 
       const newRevealed = new Set(revealed);
+      const newFlagged = new Set(flagged);
       const visited = new Set();
       const queue = [[row, col]];
 
@@ -115,6 +116,9 @@ function reducer(state, action) {
 
         const cell = board[r][c];
         newRevealed.add(key);
+        if (newFlagged.has(key)) {
+          newFlagged.delete(key);
+        }
         visited.add(key);
 
         if (cell.isMine)
@@ -129,21 +133,27 @@ function reducer(state, action) {
         }
       }
 
-      return { ...state, revealed: newRevealed, gameState: newGameState };
+      return {
+        ...state,
+        revealed: newRevealed,
+        gameState: newGameState,
+        flagged: newFlagged,
+      };
 
     case 'TOGGLE_FLAG':
-      if (state.gameState !== 'running') return state;
+      if (state.gameState === 'over') return state;
       const { row: toggleRow, col: toggleCol } = action.payload;
       const toggleKey = `${toggleRow},${toggleCol}`;
-      const newFlagged = new Set(state.flagged);
+      if (state.revealed.has(toggleKey)) return state;
+      const newFlaggedFlag = new Set(state.flagged);
 
-      if (newFlagged.has(toggleKey)) {
-        newFlagged.delete(toggleKey);
+      if (newFlaggedFlag.has(toggleKey)) {
+        newFlaggedFlag.delete(toggleKey);
       } else {
-        newFlagged.add(toggleKey);
+        newFlaggedFlag.add(toggleKey);
       }
 
-      return { ...state, flagged: newFlagged };
+      return { ...state, flagged: newFlaggedFlag };
 
     case 'RESET_GAME':
       return { ...initialState, board: initBoard(state.level) };
@@ -256,7 +266,7 @@ function Cell({ row, col, isRevealed, dispatch, board, isFlagged }) {
   let content;
   if (isFlagged) {
     content = CellStates.FLAG;
-  } else {
+  } else if (isRevealed) {
     content = cell.isMine ? CellStates.BOMB : cell.count || CellStates.EMPTY;
   }
 
@@ -273,13 +283,13 @@ function Cell({ row, col, isRevealed, dispatch, board, isFlagged }) {
       onContextMenu={handleRightClick}
       onClick={handleClick}
       className={`flex h-4 w-4 select-none items-center justify-center ${
-        isRevealed || isFlagged ? 'border-[1px] border-[#7a7a7a]' : borderStyle
+        isRevealed ? 'border-[1px] border-[#7a7a7a]' : borderStyle
       }`}
     >
       {isRevealed && (
         <img src={flagPaths[content]} alt={content} className="h-3 w-3" />
       )}
-      {isFlagged && <img src={flagPaths['flagged']} alt="flag"></img>}
+      {isFlagged && <img src={flagPaths[content]} alt="flag"></img>}
     </div>
   );
 }
