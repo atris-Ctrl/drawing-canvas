@@ -9,35 +9,27 @@ import {
   placeMine,
   CellStates,
   GAME_STATE,
+  initBoard,
 } from './config';
 import '../winxp/theme.min.css';
 
-function initBoard(level) {
-  const N_ROW = settings[level].N_ROW;
-  const N_COL = settings[level].N_COL;
-  let board = new Array(N_ROW);
-  for (let i = 0; i < N_ROW; i++) {
-    board[i] = Array.from({ length: N_COL }, (_, j) => {
-      return { count: 0, isMine: false };
-    });
-  }
-  const mineCoords = placeMine(board, level);
-  countMine(board, level);
-  return { board, mineCoords };
-}
 function WindowWithMenu({ dispatch, children }) {
   return (
-    <div className="window active">
-      <div className="title-bar">
-        <div className="title-bar-text">Minesweeper</div>
-        <div className="title-bar-buttons">
-          <button data-minimize="" />
-          <button data-maximize="" />
+    <div className="window active inline-block">
+      <div className="title-bar w-full">
+        <div className="title-bar-text flex w-fit items-center">
+          <img src="assets/minesweeper/mine.png" className="h-auto w-4" />
+          Minesweeper
+        </div>
+        <div className="title-bar-buttons flex shrink-0">
+          {/* <button data-minimize="" /> */}
+          {/* <button data-maximize="" /> */}
           <button data-close="" />
         </div>
       </div>
-      <div className="windowXP-body">
-        <ul role="menubar" className="flex">
+
+      <div className="window-body inline-block bg-[#c0c0c0]">
+        <ul role="menubar" className="flex w-fit">
           <li
             tabIndex="0"
             aria-haspopup={true}
@@ -46,7 +38,7 @@ function WindowWithMenu({ dispatch, children }) {
             <u>G</u>ame
             <ul
               role="menu"
-              className="absolute left-0 top-full hidden border border-gray-400 bg-white p-1 group-hover:block group-focus:block"
+              className="absolute left-0 hidden border border-gray-400 bg-white p-1 group-hover:block group-focus:block"
             >
               <li
                 tabIndex="0"
@@ -74,6 +66,7 @@ function WindowWithMenu({ dispatch, children }) {
               </li>
             </ul>
           </li>
+
           <li
             tabIndex="0"
             aria-haspopup={true}
@@ -84,17 +77,26 @@ function WindowWithMenu({ dispatch, children }) {
               role="menu"
               className="absolute left-0 top-full hidden border border-gray-400 bg-white p-1 group-hover:block group-focus:block"
             >
-              <li tabIndex="0">Github</li>
+              <li tabIndex="0">
+                <a
+                  href="https://github.com/atris-Ctrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Github
+                </a>
+              </li>
             </ul>
           </li>
         </ul>
 
-        <div>{children}</div>
+        <div className="inline-block">{children}</div>
       </div>
     </div>
   );
 }
-// game state name , ui row. link github, close it,  fix windowXP, add bomb images, cross if wrong flag added, fix cell ui
+
+//   close it,
 
 const initialState = {
   level: 'beginner',
@@ -234,11 +236,11 @@ function reducer(state, action) {
   }
 }
 
-const borderStyle =
-  'border-b-4 border-l-4 border-r-4 border-t-4 border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white';
+const borderStyle = (borderSize = 4) =>
+  `border-b-${borderSize} border-l-${borderSize} border-r-${borderSize} border-t-${borderSize} border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white`;
 
-const sunkenBorderStyle =
-  'border-b-2 border-l-2 border-r-2 border-t-2 border-b-white border-l-[#7a7a7a] border-r-white border-t-[#7a7a7a]';
+const sunkenBorderStyle = (borderSize = 2) =>
+  `border-b-${borderSize} border-l-${borderSize} border-r-${borderSize} border-t-${borderSize} border-b-white border-l-[#7a7a7a] border-r-white border-t-[#7a7a7a]`;
 
 function MineSweeper() {
   const [state, dispatch] = useReducer(reducer, 'beginner', initializeState);
@@ -251,14 +253,16 @@ function MineSweeper() {
   return (
     <WindowWithMenu dispatch={dispatch}>
       <div
-        className={`m-0 flex flex-col items-center gap-2 bg-[#c0c0c0] ${borderStyle}`}
+        className={`m-0 inline-flex flex-col gap-2 bg-[#c0c0c0] ${borderStyle()}`}
       >
-        <div className={`flex w-full ${sunkenBorderStyle}`}>
+        <div
+          className={`flex justify-between px-1.5 py-1 ${sunkenBorderStyle(2)}`}
+        >
           <NumberStyle number={remainingBombs} />
           <EmojiButton gameState={gameState} dispatch={dispatch} />
           <StopWatch gameState={gameState} dispatch={dispatch} time={time} />
         </div>
-        <div className={`inline-block w-full ${sunkenBorderStyle}`}>
+        <div className={`inline-block ${sunkenBorderStyle(4)}`}>
           {fixedArrayRow.map((row) => (
             <Row
               key={row}
@@ -307,7 +311,7 @@ function EmojiButton({ gameState, dispatch }) {
 
   return (
     <div
-      className={`${borderStyle} m-1 flex h-7 w-7 items-center justify-center active:bg-[#7a7a7a]`}
+      className={`${borderStyle()} m-1 flex h-7 w-7 items-center justify-center active:bg-[#7a7a7a]`}
       onClick={() => dispatch({ type: 'RESET_GAME' })}
     >
       <img src={emoji} alt="emoji" />
@@ -398,13 +402,15 @@ function Cell({
       onContextMenu={handleRightClick}
       onClick={handleClick}
       disabled={isLost || gameState === GAME_STATE.WIN}
-      className={`relative flex h-5 w-5 select-none items-center justify-center active:bg-[#7a7a7a] ${
-        isRevealed ? 'border-[1px] border-[#7a7a7a]' : borderStyle
-      }`}
+      className={`flex h-5 w-5 select-none items-center justify-center ${
+        !isRevealed && !isFlagged && gameState === GAME_STATE.RUNNING
+          ? 'active:bg-[#7a7a7a]'
+          : ''
+      } ${isRevealed ? 'border-[0.5px] border-[#7a7a7a]' : borderStyle(4)}`}
     >
       {overlayContent && (
         <img
-          className="absolute left-0 top-0 h-full w-full object-contain"
+          className="left-0 top-0 h-full w-full"
           src={flagPaths[overlayContent]}
           alt="flag"
         ></img>
@@ -413,7 +419,7 @@ function Cell({
         <img
           src={flagPaths[baseContent]}
           alt={baseContent}
-          className="h-full w-full object-contain"
+          className="h-full w-full"
         />
       )}
     </div>
@@ -422,12 +428,26 @@ function Cell({
 
 function NumberStyle({ number }) {
   let numberStr = String(number).padStart(3, '0');
+
   return (
-    <div className={`flex ${sunkenBorderStyle}`}>
-      <img src={numberPaths[numberStr[0]]} />
-      <img src={numberPaths[numberStr[1]]} />
-      <img src={numberPaths[numberStr[2]]} />
+    <div className={`flex ${sunkenBorderStyle()}`}>
+      <img
+        className="h-8 w-auto"
+        src={numberPaths[numberStr[0]]}
+        alt={numberStr[0]}
+      />
+      <img
+        className="h-8 w-auto"
+        src={numberPaths[numberStr[1]]}
+        alt={numberStr[1]}
+      />
+      <img
+        className="h-8 w-auto"
+        src={numberPaths[numberStr[2]]}
+        alt={numberStr[2]}
+      />
     </div>
   );
 }
+
 export default MineSweeper;

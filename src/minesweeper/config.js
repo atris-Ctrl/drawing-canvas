@@ -134,3 +134,16 @@ export function placeMine(board, level) {
   }
   return mineCoords;
 }
+export function initBoard(level) {
+  const N_ROW = settings[level].N_ROW;
+  const N_COL = settings[level].N_COL;
+  let board = new Array(N_ROW);
+  for (let i = 0; i < N_ROW; i++) {
+    board[i] = Array.from({ length: N_COL }, (_, j) => {
+      return { count: 0, isMine: false };
+    });
+  }
+  const mineCoords = placeMine(board, level);
+  countMine(board, level);
+  return { board, mineCoords };
+}
