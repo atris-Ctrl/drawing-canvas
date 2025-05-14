@@ -122,7 +122,7 @@ export function placeMine(board, level) {
     row = Math.floor(order[i] / N_COL);
     col = order[i] % N_COL;
     board[row][col].isMine = true;
-    mineCoords.push(`${row}, ${col}`);
+    mineCoords.push(`${row},${col}`);
   }
   return mineCoords;
 }

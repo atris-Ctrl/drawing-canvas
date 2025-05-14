@@ -26,16 +26,16 @@ function initBoard(level) {
 }
 function WindowWithMenu({ dispatch, children }) {
   return (
-    <div className="window active inline-block">
+    <div className="window active">
       <div className="title-bar">
-        <div className="title-bar-text">Window Title</div>
+        <div className="title-bar-text">Minesweeper</div>
         <div className="title-bar-buttons">
           <button data-minimize="" />
           <button data-maximize="" />
           <button data-close="" />
         </div>
       </div>
-      <div className="window-body">
+      <div className="windowXP-body">
         <ul role="menubar" className="flex">
           <li
             tabIndex="0"
@@ -88,11 +88,12 @@ function WindowWithMenu({ dispatch, children }) {
           </li>
         </ul>
 
-        <div className="padding">{children}</div>
+        <div>{children}</div>
       </div>
     </div>
   );
 }
+// game state name , ui row. link github, close it,  fix windowXP, add bomb images, cross if wrong flag added, fix cell ui
 const initialState = {
   level: 'beginner',
   board: [],
@@ -160,7 +161,7 @@ function reducer(state, action) {
 
         if (cell.isMine) {
           revealMineCoords.forEach((coords) => newRevealed.add(coords));
-
+          console.log('jakdsjask', newRevealed);
           return { ...state, gameState: 'over', revealed: newRevealed };
         }
         if (cell.count === 0 && !cell.isMine) {
@@ -236,32 +237,28 @@ const sunkenBorderStyle =
 
 function MineSweeper() {
   const [state, dispatch] = useReducer(reducer, initializeState('beginner'));
-  const { board, level, flagged, gameState, time } = state;
+  const { level, flagged, gameState, time } = state;
   const { N_ROW, N_BOMBS } = settings[level];
   const fixedArrayRow = Array.from(Array(N_ROW).keys());
   const remainingBombs = N_BOMBS - flagged.size;
 
   return (
-    <>
-      <WindowWithMenu dispatch={dispatch}>
-        <div
-          className={`flex flex-col items-center gap-2 bg-[#c0c0c0] p-2 ${borderStyle}`}
-        >
-          <div
-            className={`space-between flex w-full gap-2 bg-gray-300 px-3.5 py-1 ${sunkenBorderStyle}`}
-          >
-            <NumberStyle number={remainingBombs} />
-            <EmojiButton gameState={gameState} dispatch={dispatch} />
-            <StopWatch gameState={gameState} dispatch={dispatch} time={time} />
-          </div>
-          <div className={`inline-block w-full ${sunkenBorderStyle}`}>
-            {fixedArrayRow.map((row) => (
-              <Row key={row} row={row} dispatch={dispatch} boardState={state} />
-            ))}
-          </div>
+    <WindowWithMenu dispatch={dispatch}>
+      <div
+        className={`m-0 flex flex-col items-center gap-2 bg-[#c0c0c0] ${borderStyle}`}
+      >
+        <div className={`flex w-full ${sunkenBorderStyle}`}>
+          <NumberStyle number={remainingBombs} />
+          <EmojiButton gameState={gameState} dispatch={dispatch} />
+          <StopWatch gameState={gameState} dispatch={dispatch} time={time} />
         </div>
-      </WindowWithMenu>
-    </>
+        <div className={`inline-block w-full ${sunkenBorderStyle}`}>
+          {fixedArrayRow.map((row) => (
+            <Row key={row} row={row} dispatch={dispatch} boardState={state} />
+          ))}
+        </div>
+      </div>
+    </WindowWithMenu>
   );
 }
 
