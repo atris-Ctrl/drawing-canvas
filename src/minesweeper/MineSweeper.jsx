@@ -1,4 +1,4 @@
-import { useReducer, useEffect } from 'react';
+import { useReducer, useEffect, memo } from 'react';
 import {
   flagPaths,
   numberPaths,
@@ -8,6 +8,7 @@ import {
   countMine,
   placeMine,
   CellStates,
+  GAME_STATE,
 } from './config';
 import '../winxp/theme.min.css';
 
@@ -17,7 +18,7 @@ function initBoard(level) {
   let board = new Array(N_ROW);
   for (let i = 0; i < N_ROW; i++) {
     board[i] = Array.from({ length: N_COL }, (_, j) => {
-      return { count: 0, isMine: false, isRevealed: false };
+      return { count: 0, isMine: false };
     });
   }
   const mineCoords = placeMine(board, level);
@@ -94,6 +95,7 @@ function WindowWithMenu({ dispatch, children }) {
   );
 }
 // game state name , ui row. link github, close it,  fix windowXP, add bomb images, cross if wrong flag added, fix cell ui
+
 const initialState = {
   level: 'beginner',
   board: [],
@@ -101,12 +103,13 @@ const initialState = {
   revealed: new Set(),
   flagged: new Set(),
   settings: {},
-  gameState: 'start',
+  gameState: GAME_STATE.START,
   time: 0,
 };
 
 function initializeState(level) {
   const { board, mineCoords } = initBoard(level);
+  console.log('called INIT STATE');
   return {
     ...initialState,
     level,
@@ -128,12 +131,16 @@ function reducer(state, action) {
         mineCoords: revealMineCoords,
       } = state;
       let newGameState = gameState;
-      if (gameState === 'start') {
-        newGameState = 'running';
+      if (gameState === GAME_STATE.START) {
+        newGameState = GAME_STATE.RUNNING;
       }
       const { N_ROW: numRows, N_COL: numCols, N_BOMBS } = settings[level];
       const key = `${row},${col}`;
-      if (gameState === 'over' || revealed.has(key) || flagged.has(key))
+      if (
+        newGameState !== GAME_STATE.RUNNING ||
+        revealed.has(key) ||
+        flagged.has(key)
+      )
         return state;
 
       const newRevealed = new Set(revealed);
@@ -161,8 +168,11 @@ function reducer(state, action) {
 
         if (cell.isMine) {
           revealMineCoords.forEach((coords) => newRevealed.add(coords));
-          console.log('jakdsjask', newRevealed);
-          return { ...state, gameState: 'over', revealed: newRevealed };
+          return {
+            ...state,
+            gameState: GAME_STATE.LOST,
+            revealed: newRevealed,
+          };
         }
         if (cell.count === 0 && !cell.isMine) {
           for (let dx = -1; dx <= 1; dx++) {
@@ -176,8 +186,7 @@ function reducer(state, action) {
       const totalCells = numRows * numCols;
       const revealedCells = newRevealed.size;
       const isWin = revealedCells === totalCells - N_BOMBS;
-      if (isWin)
-        return { ...state, gameState: isWin ? 'won' : state.gameState };
+      newGameState = isWin ? GAME_STATE.WIN : newGameState;
       return {
         ...state,
         revealed: newRevealed,
@@ -186,7 +195,7 @@ function reducer(state, action) {
       };
 
     case 'TOGGLE_FLAG':
-      if (state.gameState === 'over') return state;
+      if (state.gameState !== GAME_STATE.RUNNING) return state;
       const { row: toggleRow, col: toggleCol } = action.payload;
       const toggleKey = `${toggleRow},${toggleCol}`;
       if (state.revealed.has(toggleKey)) return state;
@@ -201,26 +210,13 @@ function reducer(state, action) {
 
     case 'RESET_GAME':
       const currentLevel = state.level;
-      const { board: newBoard, mineCoords } = initBoard(currentLevel);
-      return {
-        ...initialState,
-        board: newBoard,
-        mineCoords,
-        level: currentLevel,
-      };
+      return { ...initializeState(currentLevel) };
 
     case 'CHANGE_LEVEL':
       const newLevel = action.payload;
-      const newLevelBoardState = initBoard(newLevel);
-
-      return {
-        ...initialState,
-        level: newLevel,
-        board: newLevelBoardState.board,
-        mineCoords: newLevelBoardState.mineCoords,
-      };
+      return { ...initializeState(newLevel) };
     case 'TICK':
-      if (state.gameState === 'running')
+      if (state.gameState === GAME_STATE.RUNNING)
         return { ...state, time: state.time + 1 };
       return state;
 
@@ -236,8 +232,8 @@ const sunkenBorderStyle =
   'border-b-2 border-l-2 border-r-2 border-t-2 border-b-white border-l-[#7a7a7a] border-r-white border-t-[#7a7a7a]';
 
 function MineSweeper() {
-  const [state, dispatch] = useReducer(reducer, initializeState('beginner'));
-  const { level, flagged, gameState, time } = state;
+  const [state, dispatch] = useReducer(reducer, 'beginner', initializeState);
+  const { level, flagged, gameState, time, board, revealed } = state;
   const { N_ROW, N_BOMBS } = settings[level];
   const fixedArrayRow = Array.from(Array(N_ROW).keys());
   const remainingBombs = N_BOMBS - flagged.size;
@@ -254,7 +250,15 @@ function MineSweeper() {
         </div>
         <div className={`inline-block w-full ${sunkenBorderStyle}`}>
           {fixedArrayRow.map((row) => (
-            <Row key={row} row={row} dispatch={dispatch} boardState={state} />
+            <Row
+              key={row}
+              row={row}
+              dispatch={dispatch}
+              revealed={revealed}
+              flagged={flagged}
+              board={board}
+              level={level}
+            />
           ))}
         </div>
       </div>
@@ -265,8 +269,8 @@ function MineSweeper() {
 function StopWatch({ gameState, dispatch, time }) {
   useEffect(() => {
     let timer;
-    if (gameState !== 'running') return;
-    timer = setInterval(() => dispatch({ type: 'TICK' }), 1000);
+    if (gameState === GAME_STATE.RUNNING)
+      timer = setInterval(() => dispatch({ type: 'TICK' }), 1000);
     return () => clearInterval(timer);
   }, [gameState]);
 
@@ -276,10 +280,12 @@ function StopWatch({ gameState, dispatch, time }) {
 function EmojiButton({ gameState, dispatch }) {
   const emoji = (() => {
     switch (gameState) {
-      case 'idle':
+      case GAME_STATE.RUNNING:
         return emojiPaths.smile;
-      case 'over':
+      case GAME_STATE.LOST:
         return emojiPaths.dead;
+      case GAME_STATE.WIN:
+        return emojiPaths.win;
       case '?':
         return emojiPaths.ohh;
       default:
@@ -296,8 +302,7 @@ function EmojiButton({ gameState, dispatch }) {
     </div>
   );
 }
-function Row({ row, boardState, dispatch }) {
-  const { revealed, flagged, board, level } = boardState;
+const Row = function Row({ row, dispatch, revealed, flagged, board, level }) {
   const { N_COL } = settings[level];
   const fixedArrayCol = Array.from(Array(N_COL).keys());
   return (
@@ -318,13 +323,24 @@ function Row({ row, boardState, dispatch }) {
       })}
     </div>
   );
-}
+};
 
-function Cell({ row, col, isRevealed, dispatch, board, isFlagged }) {
+const Cell = function Cell({
+  row,
+  col,
+  isRevealed,
+  dispatch,
+  board,
+  isFlagged,
+}) {
   const cell = board[row][col];
   let content;
   if (isFlagged) {
-    content = CellStates.FLAG;
+    if (isRevealed && !cell.isMine && gameState === 'over') {
+      content = CellStates.WRONG_FLAG;
+    } else {
+      content = CellStates.FLAG;
+    }
   } else if (isRevealed) {
     content = cell.isMine ? CellStates.BOMB : cell.count || CellStates.EMPTY;
   }
@@ -351,7 +367,7 @@ function Cell({ row, col, isRevealed, dispatch, board, isFlagged }) {
       {isFlagged && <img src={flagPaths[content]} alt="flag"></img>}
     </div>
   );
-}
+};
 function NumberStyle({ number }) {
   let numberStr = String(number).padStart(3, '0');
   return (

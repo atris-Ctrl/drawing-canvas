@@ -11,7 +11,7 @@ export const settings = {
   beginner: {
     N_ROW: 8,
     N_COL: 8,
-    N_BOMBS: 10,
+    N_BOMBS: 5,
   },
   intermediate: {
     N_ROW: 9,
@@ -45,7 +45,12 @@ export const numberPaths = {
   9: `${numberPath}/digit9.png`,
   0: `${numberPath}/digit0.png`,
 };
-
+export const GAME_STATE = {
+  START: 'start',
+  RUNNING: 'running',
+  WIN: 'win',
+  LOST: 'over',
+};
 export const flagPaths = {
   1: `${flagPath}/open1.png`,
   2: `${flagPath}/open2.png`,
