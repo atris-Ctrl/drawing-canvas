@@ -1,4 +1,4 @@
-import { useReducer, useEffect, memo } from 'react';
+import { useReducer, useEffect } from 'react';
 import {
   flagPaths,
   numberPaths,
@@ -43,7 +43,7 @@ function WindowWithMenu({ dispatch, children }) {
             aria-haspopup={true}
             className="group relative cursor-pointer"
           >
-            <u>S</u>ettings
+            <u>G</u>ame
             <ul
               role="menu"
               className="absolute left-0 top-full hidden border border-gray-400 bg-white p-1 group-hover:block group-focus:block"
@@ -100,6 +100,7 @@ const initialState = {
   level: 'beginner',
   board: [],
   mineCoords: [],
+  clickedBombed: {},
   revealed: new Set(),
   flagged: new Set(),
   settings: {},
@@ -109,7 +110,6 @@ const initialState = {
 
 function initializeState(level) {
   const { board, mineCoords } = initBoard(level);
-  console.log('called INIT STATE');
   return {
     ...initialState,
     level,
@@ -134,7 +134,11 @@ function reducer(state, action) {
       if (gameState === GAME_STATE.START) {
         newGameState = GAME_STATE.RUNNING;
       }
-      const { N_ROW: numRows, N_COL: numCols, N_BOMBS } = settings[level];
+      const {
+        N_ROW: numRows,
+        N_COL: numCols,
+        N_BOMBS: numBombs,
+      } = settings[level];
       const key = `${row},${col}`;
       if (
         newGameState !== GAME_STATE.RUNNING ||
@@ -167,11 +171,15 @@ function reducer(state, action) {
         visited.add(key);
 
         if (cell.isMine) {
+          const clickedBomb = { row: r, col: c };
           revealMineCoords.forEach((coords) => newRevealed.add(coords));
+          newFlagged.forEach((coords) => newRevealed.add(coords));
+
           return {
             ...state,
             gameState: GAME_STATE.LOST,
             revealed: newRevealed,
+            clickedBomb,
           };
         }
         if (cell.count === 0 && !cell.isMine) {
@@ -185,7 +193,7 @@ function reducer(state, action) {
 
       const totalCells = numRows * numCols;
       const revealedCells = newRevealed.size;
-      const isWin = revealedCells === totalCells - N_BOMBS;
+      const isWin = revealedCells === totalCells - numBombs;
       newGameState = isWin ? GAME_STATE.WIN : newGameState;
       return {
         ...state,
@@ -196,6 +204,7 @@ function reducer(state, action) {
 
     case 'TOGGLE_FLAG':
       if (state.gameState !== GAME_STATE.RUNNING) return state;
+      const { N_BOMBS } = settings[state.level];
       const { row: toggleRow, col: toggleCol } = action.payload;
       const toggleKey = `${toggleRow},${toggleCol}`;
       if (state.revealed.has(toggleKey)) return state;
@@ -203,7 +212,7 @@ function reducer(state, action) {
       if (newFlaggedFlag.has(toggleKey)) {
         newFlaggedFlag.delete(toggleKey);
       } else {
-        newFlaggedFlag.add(toggleKey);
+        if (newFlaggedFlag.size < N_BOMBS) newFlaggedFlag.add(toggleKey);
       }
 
       return { ...state, flagged: newFlaggedFlag };
@@ -233,7 +242,8 @@ const sunkenBorderStyle =
 
 function MineSweeper() {
   const [state, dispatch] = useReducer(reducer, 'beginner', initializeState);
-  const { level, flagged, gameState, time, board, revealed } = state;
+  const { level, flagged, gameState, time, board, revealed, clickedBomb } =
+    state;
   const { N_ROW, N_BOMBS } = settings[level];
   const fixedArrayRow = Array.from(Array(N_ROW).keys());
   const remainingBombs = N_BOMBS - flagged.size;
@@ -258,6 +268,8 @@ function MineSweeper() {
               flagged={flagged}
               board={board}
               level={level}
+              clickedBomb={clickedBomb}
+              gameState={gameState}
             />
           ))}
         </div>
@@ -302,7 +314,16 @@ function EmojiButton({ gameState, dispatch }) {
     </div>
   );
 }
-const Row = function Row({ row, dispatch, revealed, flagged, board, level }) {
+const Row = function Row({
+  row,
+  dispatch,
+  revealed,
+  flagged,
+  board,
+  level,
+  gameState,
+  clickedBomb,
+}) {
   const { N_COL } = settings[level];
   const fixedArrayCol = Array.from(Array(N_COL).keys());
   return (
@@ -311,9 +332,11 @@ const Row = function Row({ row, dispatch, revealed, flagged, board, level }) {
         const key = `${row},${col}`;
         return (
           <Cell
+            clickedBomb={clickedBomb}
             key={key}
             row={row}
             col={col}
+            gameState={gameState}
             isRevealed={revealed.has(key)}
             isFlagged={flagged.has(key)}
             dispatch={dispatch}
@@ -325,24 +348,41 @@ const Row = function Row({ row, dispatch, revealed, flagged, board, level }) {
   );
 };
 
-const Cell = function Cell({
+function Cell({
   row,
   col,
   isRevealed,
   dispatch,
   board,
   isFlagged,
+  gameState,
+  clickedBomb,
 }) {
   const cell = board[row][col];
-  let content;
-  if (isFlagged) {
-    if (isRevealed && !cell.isMine && gameState === 'over') {
-      content = CellStates.WRONG_FLAG;
-    } else {
-      content = CellStates.FLAG;
-    }
-  } else if (isRevealed) {
-    content = cell.isMine ? CellStates.BOMB : cell.count || CellStates.EMPTY;
+  let baseContent = null;
+  let overlayContent = null;
+  const isLost = gameState === GAME_STATE.LOST;
+  const isClickedBomb =
+    isRevealed &&
+    cell.isMine &&
+    isLost &&
+    clickedBomb?.row === row &&
+    clickedBomb?.col === col;
+  const isMisflag = isFlagged && isRevealed && !cell.isMine && isLost;
+  const showFlag = isFlagged && (!isRevealed || (!cell.isMine && isLost));
+
+  if (isRevealed && !isMisflag) {
+    baseContent = isClickedBomb
+      ? CellStates.BOMBEND
+      : cell.isMine
+        ? CellStates.BOMB
+        : cell.count || CellStates.EMPTY;
+  }
+  // Overlay content
+  if (isMisflag) {
+    overlayContent = CellStates.MISFLAG;
+  } else if (showFlag) {
+    overlayContent = CellStates.FLAG;
   }
 
   function handleRightClick(e) {
@@ -357,17 +397,29 @@ const Cell = function Cell({
     <div
       onContextMenu={handleRightClick}
       onClick={handleClick}
-      className={`flex h-5 w-5 select-none items-center justify-center active:bg-[#7a7a7a] ${
+      disabled={isLost || gameState === GAME_STATE.WIN}
+      className={`relative flex h-5 w-5 select-none items-center justify-center active:bg-[#7a7a7a] ${
         isRevealed ? 'border-[1px] border-[#7a7a7a]' : borderStyle
       }`}
     >
-      {isRevealed && (
-        <img src={flagPaths[content]} alt={content} className="h-4 w-4" />
+      {overlayContent && (
+        <img
+          className="absolute left-0 top-0 h-full w-full object-contain"
+          src={flagPaths[overlayContent]}
+          alt="flag"
+        ></img>
       )}
-      {isFlagged && <img src={flagPaths[content]} alt="flag"></img>}
+      {baseContent && (
+        <img
+          src={flagPaths[baseContent]}
+          alt={baseContent}
+          className="h-full w-full object-contain"
+        />
+      )}
     </div>
   );
-};
+}
+
 function NumberStyle({ number }) {
   let numberStr = String(number).padStart(3, '0');
   return (

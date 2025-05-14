@@ -5,6 +5,8 @@ export const CellStates = {
   FLAG: 'flag',
   BOMB: 'bomb',
   EMPTY: 'empty',
+  MISFLAG: 'misFlagged',
+  BOMBEND: 'bombEnd',
 };
 
 export const settings = {
@@ -51,6 +53,7 @@ export const GAME_STATE = {
   WIN: 'win',
   LOST: 'over',
 };
+
 export const flagPaths = {
   1: `${flagPath}/open1.png`,
   2: `${flagPath}/open2.png`,
