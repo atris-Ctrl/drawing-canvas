@@ -10,6 +10,14 @@ import {
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
+//TODO: FIX TOPCARD IN FOUNDATION
+// ADD FUNCTION TO MOVE CARD(S)TO VALID PLACE IF POSSIBLE
+// DRAG AND DROP FUNCTION
+// DRAW THREE / ONE IN DEAL
+// CALCULATE WIN
+// RESET FUNCTION
+// SCORE FUNCTION, STOPWATCH FUNCTION
+
 function reducer(state, action) {
   switch (action.type) {
     case ACTIONS.DRAW:
