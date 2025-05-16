@@ -1,20 +1,21 @@
-import { useNavigate } from "react-router";
-import Chicken from "../components/chicken/Chicken";
-import Footer from "../ui/Footer";
-import DesktopIcon from "../components/desktop/DesktopIcon";
-import ToDoListPage from "./ToDoListPage";
-import CommandPrompt from "../components/desktop/CommandPrompt";
+import { useNavigate } from 'react-router';
+import Chicken from '../components/chicken/Chicken';
+import Footer from '../ui/Footer';
+import DesktopIcon from '../components/desktop/DesktopIcon';
+import CommandPrompt from '../components/desktop/CommandPrompt';
+import MineSweeper from '../minesweeper/MineSweeper';
 
 function HomePage() {
   return (
     <>
-      <div className="overflow-hidden min-h-screen flex flex-col bg-[url('/assets/windowXP-bliss.jpg')] bg-cover bg-center">
-        <div className="p-3 flex-1 overflow-auto">
+      <div className="flex min-h-screen flex-col overflow-hidden bg-[url('/assets/windowXP-bliss.jpg')] bg-cover bg-center">
+        <div className="flex-1 overflow-auto p-3">
           <DesktopApps />
         </div>
+        <MineSweeper />
         <CommandPrompt />
         <Chicken />
-        <ToDoListPage />
+        {/* <ToDoListPage /> */}
         <Footer />
       </div>
     </>
@@ -25,7 +26,7 @@ function DesktopApps() {
   const navigate = useNavigate();
 
   function handleDoubleClick() {
-    navigate("/canvas");
+    navigate('/canvas');
   }
   return (
     <div className="flex gap-10 p-4">

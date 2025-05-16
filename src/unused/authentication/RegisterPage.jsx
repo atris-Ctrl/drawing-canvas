@@ -1,20 +1,20 @@
-import "../index.css";
-import { Link, useNavigate } from "react-router";
-import UserForm from "../components/form/UserForm";
-import { useEffect } from "react";
-import { useAuth } from "../contexts/AuthProvider";
+import '../index.css';
+import { Link, useNavigate } from 'react-router';
+import UserForm from '../../components/form/UserForm';
+import { useEffect } from 'react';
+import { useAuth } from './AuthProvider';
 
 function RegisterPage() {
   const { createNewUser, user, isLoading } = useAuth();
   const navigate = useNavigate();
   function handleSignUp(userEmail, userPassword, displayName) {
-    if (userEmail === "" || (userPassword === "") | (displayName === ""))
+    if (userEmail === '' || (userPassword === '') | (displayName === ''))
       return;
     createNewUser(userEmail, userPassword, displayName);
   }
 
   useEffect(() => {
-    if (user) navigate("/");
+    if (user) navigate('/');
   }, [user, navigate]);
   return (
     <>

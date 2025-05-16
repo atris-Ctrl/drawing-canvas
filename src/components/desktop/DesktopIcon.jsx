@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState } from "react";
-import Draggable from "react-draggable";
+import { useRef, useEffect, useState } from 'react';
+import Draggable from 'react-draggable';
 
 function DesktopIcon({ iconSrc, label, onDoubleClick }) {
   const [selected, setSelected] = useState(false);
@@ -14,8 +14,8 @@ function DesktopIcon({ iconSrc, label, onDoubleClick }) {
     const handleWindowClick = () => {
       setSelected(false);
     };
-    window.addEventListener("click", handleWindowClick);
-    return () => window.removeEventListener("click", handleWindowClick);
+    window.addEventListener('click', handleWindowClick);
+    return () => window.removeEventListener('click', handleWindowClick);
   }, []);
 
   return (
@@ -24,20 +24,20 @@ function DesktopIcon({ iconSrc, label, onDoubleClick }) {
         <div
           onClick={handleClick}
           onDoubleClick={onDoubleClick}
-          className={`w-fit h-fit absolute w-20 text-center cursor-pointer select-none`}
+          className={`absolute h-fit w-20 w-fit cursor-pointer select-none text-center`}
         >
           <div
-            className={`flex flex-col items-center py-1  ${
-              selected ? "border border-dashed border-white" : ""
+            className={`flex flex-col items-center py-1 ${
+              selected ? 'border border-dashed border-white' : ''
             } hover:bg-blue-200/50`}
           >
             <img
               src={iconSrc}
               onDragStart={(e) => e.preventDefault()}
               alt="icon"
-              className="w-12 h-12 mb-1"
+              className="mb-1 h-auto w-12"
             />
-            <span className="text-sm text-white drop-shadow font-bold">
+            <span className="text-sm font-bold text-white drop-shadow">
               {label}
             </span>
           </div>
