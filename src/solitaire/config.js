@@ -7,7 +7,14 @@ export const ACTIONS = {
   DRAW: 'draw',
   MOVE_TO_FOUNDATION: 'move_to_foundation',
   MOVE_CARD: 'move_card',
+  FLIP_CARD: 'flip_card',
   TICK: 'tick',
+};
+
+export const LOCATIONS = {
+  TABLEAU: 'tableau',
+  FOUNDATION: 'foundation',
+  WASTE: 'waste',
 };
 
 export const GAME_STATE = {
@@ -40,13 +47,35 @@ export function isFaceUp(card) {
 }
 
 export function canMoveCard(card, topCard) {
+  if (!card.faceUp || !topCard.faceUp) return false;
   const isDifferent = isBlack(card.suit) !== isBlack(topCard.suit);
   const isNextNumber = card.value === topCard.value - 1;
   return isDifferent && isNextNumber;
 }
 
+function findValidSpot(card, tableau, foundation) {
+  if (!card.faceUp) return;
+  // MOVE TO ANOTHER PILE
+  for (let col = 0; col < tableau.length; col++) {
+    const currentPile = tableau[col];
+    if (canMovePile(card, currentPile))
+      return {
+        location: LOCATIONS.TABLEAU,
+        index: col,
+      };
+  }
+  // MOVE TO FOUNDATION
+  for (let col = 0; col < foundation.length; col++) {
+    const deck = foundation[col];
+    if (canMoveFoundation(card, deck)) {
+      return { location: LOCATIONS.FOUNDATION, index: col };
+    }
+  }
+  return null;
+}
+
 function canMovePile(card, pile) {
-  const { value } = card;
+  const { value, suit } = card;
 
   if (pile.length === 0 && value === 13) return true;
 
@@ -60,7 +89,8 @@ export function canMoveFoundation(card, pile) {
     return value === 1;
   }
   const topCard = pile[pile.length - 1];
-  return canMoveCard(card, topCard);
+
+  return suit === topCard.suit && value === topCard.value + 1;
 }
 
 export function createDeck() {

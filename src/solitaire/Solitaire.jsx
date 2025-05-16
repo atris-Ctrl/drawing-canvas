@@ -6,6 +6,7 @@ import {
   init,
   isBlack,
   initialState,
+  LOCATIONS,
 } from './config';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -20,6 +21,22 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 
 function reducer(state, action) {
   switch (action.type) {
+    case ACTIONS.FLIP_CARD:
+      // WHAT IS THIS SO MESSY !!!
+      const {
+        pileIndex: flipPileIndex,
+        cardIndex: flipCardIndex,
+        location: flipLocation,
+      } = action.payload;
+      if (flipLocation !== LOCATIONS.TABLEAU) return;
+      const { tableau: flipTableau } = state;
+      const newFlipTableau = [...flipTableau];
+      const flipPile = [...flipTableau[flipPileIndex]];
+      const flipCard = { ...flipPile[flipCardIndex], faceUp: true };
+      flipPile[flipCardIndex] = flipCard;
+      newFlipTableau[flipPileIndex] = flipPile;
+      return { ...state, tableau: newFlipTableau };
+
     case ACTIONS.DRAW:
       const { stock: drawStock, waste: drawWaste } = state;
       if (drawStock.length === 0 && drawWaste.length > 0) {
@@ -42,7 +59,6 @@ function reducer(state, action) {
     case ACTIONS.MOVE_CARD:
       return state;
     case ACTIONS.MOVE_TO_FOUNDATION:
-      console.log('move to foundation');
       const { foundation, tableau, waste } = state;
       const { index, card, from, pileIndex, cardIndex } = action.payload;
 
@@ -51,15 +67,15 @@ function reducer(state, action) {
       const newTableau = [...tableau];
       const newWaste = [...waste];
 
-      if (from === 'tableau') {
+      if (from === LOCATIONS.TABLEAU) {
         const newPile = [...newTableau[pileIndex]];
         newTableau[pileIndex] = newPile.slice(0, cardIndex);
-      } else if (from === 'waste') {
+      } else if (from === LOCATIONS.WASTE) {
         newWaste.shift();
       } else {
         return state;
       }
-      newFoundation[index].unshift(card);
+      newFoundation[index].push(card);
       console.log(newFoundation);
       return {
         ...state,
@@ -128,7 +144,7 @@ function Pile({ cards, dispatch, pileIndex }) {
             pileIndex={pileIndex}
             cardIndex={index}
             card={card}
-            location="tableau"
+            location={LOCATIONS.TABLEAU}
           />
         </div>
       ))}
@@ -159,14 +175,14 @@ function Waste({ cards, dispatch }) {
         key={card.id}
         dispatch={dispatch}
         card={card}
-        location="waste"
+        location={LOCATIONS.WASTE}
         className="absolute transition-all duration-200"
       />
     </div>
   );
 }
 
-function Foundation({ foundation, key, dispatch }) {
+function Foundation({ foundation, dispatch }) {
   //   const [{ canDrop }, drop] = useDrop(
   //     () => ({
   //       accept: ItemTypes.CARD,
@@ -185,7 +201,11 @@ function Foundation({ foundation, key, dispatch }) {
           {pile.length === 0 ? (
             '♢'
           ) : (
-            <Card dispatch={dispatch} card={pile[0]} location="foundation" />
+            <Card
+              dispatch={dispatch}
+              card={pile[pile.length - 1]}
+              location={LOCATIONS.FOUNDATION}
+            />
           )}
         </div>
       ))}
@@ -195,15 +215,22 @@ function Foundation({ foundation, key, dispatch }) {
 
 function Card({ card, dispatch, location, pileIndex, cardIndex }) {
   const { value, suit, faceUp } = card;
-  //   const [{ isDragging }, drag] = useDrag(() => ({
-  //     type: ItemTypes.CARD,
-  //     collect: (monitor) => ({
-  //       isDragging: !!monitor.isDragging(),
-  //     }),
-  //   }));
+  const [{ isDragging }, drag] = useDrag(() => ({
+    type: ItemTypes.CARD,
+    collect: (monitor) => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  }));
 
   function handleClick(e) {
     e.preventDefault();
+    if (!faceUp) {
+      dispatch({
+        type: ACTIONS.FLIP_CARD,
+        payload: { pileIndex, cardIndex, location },
+      });
+      return;
+    }
     dispatch({
       type: ACTIONS.MOVE_TO_FOUNDATION,
       payload: { index: 0, from: location, card, pileIndex, cardIndex },
@@ -213,7 +240,7 @@ function Card({ card, dispatch, location, pileIndex, cardIndex }) {
 
   return (
     <div
-      //   ref={drag}
+      ref={drag}
       onClick={(e) => handleClick(e)}
       className={`flex h-[90px] w-[60px] items-center justify-center rounded border border-black bg-white shadow-md ${
         faceUp ? color : 'bg-blue-800'
