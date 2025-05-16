@@ -1,103 +1,33 @@
-import { useReducer, useEffect } from 'react';
+import { useReducer, useEffect, useState } from 'react';
 import {
   flagPaths,
   numberPaths,
   settings,
   emojiPaths,
   isWithinBound,
-  countMine,
-  placeMine,
   CellStates,
   GAME_STATE,
   initBoard,
 } from './config';
 import '../winxp/theme.min.css';
+import WindowWithMenu from './WindowWithMenu';
 
-function WindowWithMenu({ dispatch, children }) {
-  return (
-    <div className="window active inline-block">
-      <div className="title-bar w-full">
-        <div className="title-bar-text flex w-fit items-center">
-          <img src="assets/minesweeper/mine.png" className="h-auto w-4" />
-          Minesweeper
-        </div>
-        <div className="title-bar-buttons flex shrink-0">
-          {/* <button data-minimize="" /> */}
-          {/* <button data-maximize="" /> */}
-          <button data-close="" />
-        </div>
-      </div>
+const borderStyle = `border-b-4 border-l-4 border-r-4 border-t-4 border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white`;
 
-      <div className="window-body inline-block bg-[#c0c0c0]">
-        <ul role="menubar" className="flex w-fit">
-          <li
-            tabIndex="0"
-            aria-haspopup={true}
-            className="group relative cursor-pointer"
-          >
-            <u>G</u>ame
-            <ul
-              role="menu"
-              className="absolute left-0 hidden border border-gray-400 bg-white p-1 group-hover:block group-focus:block"
-            >
-              <li
-                tabIndex="0"
-                onClick={() =>
-                  dispatch({ type: 'CHANGE_LEVEL', payload: 'beginner' })
-                }
-              >
-                Beginner
-              </li>
-              <li
-                tabIndex="0"
-                onClick={() =>
-                  dispatch({ type: 'CHANGE_LEVEL', payload: 'intermediate' })
-                }
-              >
-                Intermediate
-              </li>
-              <li
-                tabIndex="0"
-                onClick={() =>
-                  dispatch({ type: 'CHANGE_LEVEL', payload: 'expert' })
-                }
-              >
-                Expert
-              </li>
-            </ul>
-          </li>
+const sunkenBorderStyle2 =
+  'border-b-2 border-l-2 border-r-2 border-t-2 border-b-white border-l-[#7a7a7a] border-r-white border-t-[#7a7a7a]';
 
-          <li
-            tabIndex="0"
-            aria-haspopup={true}
-            className="group relative cursor-pointer"
-          >
-            <u>H</u>elp
-            <ul
-              role="menu"
-              className="absolute left-0 top-full hidden border border-gray-400 bg-white p-1 group-hover:block group-focus:block"
-            >
-              <li tabIndex="0">
-                <a
-                  href="https://github.com/atris-Ctrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Github
-                </a>
-              </li>
-            </ul>
-          </li>
-        </ul>
+const sunkenBorderStyle4 = `border-b-4 border-l-4 border-r-4 border-t-4 border-b-white border-l-[#7a7a7a] border-r-white border-t-[#7a7a7a]`;
 
-        <div className="inline-block">{children}</div>
-      </div>
-    </div>
-  );
-}
-
-//   close it,
-
+// * State Properties:
+// * - `board` {Array<Array<Object>>} - The Minesweeper board containing cell data.
+// * - `revealed` {Set<string>} - A set of keys representing revealed cells.
+// * - `flagged` {Set<string>} - A set of keys representing flagged cells.
+// * - `gameState` {string} - The current state of the game (`RUNNING`, `WIN`, `LOST`, etc.).
+// * - `level` {string} - The current difficulty level.
+// * - `mineCoords` {Array<string>} - The coordinates of all mines on the board.
+// * - `time` {number} - The elapsed time in seconds.
+// *
 const initialState = {
   level: 'beginner',
   board: [],
@@ -105,7 +35,6 @@ const initialState = {
   clickedBombed: {},
   revealed: new Set(),
   flagged: new Set(),
-  settings: {},
   gameState: GAME_STATE.START,
   time: 0,
 };
@@ -119,35 +48,38 @@ function initializeState(level) {
     mineCoords,
   };
 }
-
+/**
+ * Reducer function to manage the state of the Minesweeper game.
+ *
+ * Action Types:
+ * - `'REVEAL_CELL'`: Reveals a cell on the board. If the cell contains a mine, the game is lost.
+ *   - `action.payload.row` {number} - The row index of the cell to reveal.
+ *   - `action.payload.col` {number} - The column index of the cell to reveal.
+ *
+ * - `'TOGGLE_FLAG'`: Toggles a flag on a cell to mark it as a suspected mine.
+ *   - `action.payload.row` {number} - The row index of the cell to flag/unflag.
+ *   - `action.payload.col` {number} - The column index of the cell to flag/unflag.
+ *
+ * - `'RESET_GAME'`: Resets the game to its initial state for the current difficulty level.
+ *
+ * - `'CHANGE_LEVEL'`: Changes the difficulty level and resets the game.
+ *   - `action.payload` {string} - The new difficulty level.
+ *
+ * - `'TICK'`: Increments the game timer by one second if the game is running.
+ * @throws {Error} If an unknown action type is provided.
+ */
 function reducer(state, action) {
   switch (action.type) {
-    case 'REVEAL_CELL':
+    case 'REVEAL_CELL': {
       const { row, col } = action.payload;
-      const {
-        board,
-        revealed,
-        gameState,
-        flagged,
-        level,
-        mineCoords: revealMineCoords,
-      } = state;
-      let newGameState = gameState;
-      if (gameState === GAME_STATE.START) {
-        newGameState = GAME_STATE.RUNNING;
-      }
-      const {
-        N_ROW: numRows,
-        N_COL: numCols,
-        N_BOMBS: numBombs,
-      } = settings[level];
-      const key = `${row},${col}`;
-      if (
-        newGameState !== GAME_STATE.RUNNING ||
-        revealed.has(key) ||
-        flagged.has(key)
-      )
+      const { board, revealed, gameState, flagged, level, mineCoords } = state;
+
+      if (gameState !== GAME_STATE.RUNNING && gameState !== GAME_STATE.START) {
         return state;
+      }
+
+      const key = `${row},${col}`;
+      if (revealed.has(key) || flagged.has(key)) return state;
 
       const newRevealed = new Set(revealed);
       const newFlagged = new Set(flagged);
@@ -156,94 +88,82 @@ function reducer(state, action) {
 
       while (queue.length > 0) {
         const [r, c] = queue.pop();
-        const key = `${r},${c}`;
+        const cellKey = `${r},${c}`;
 
         if (
-          !isWithinBound(r, c, numRows, numCols) ||
-          visited.has(key) ||
-          newRevealed.has(key)
+          !isWithinBound(r, c, settings[level].N_ROW, settings[level].N_COL) ||
+          visited.has(cellKey) ||
+          newRevealed.has(cellKey)
         )
           continue;
 
         const cell = board[r][c];
-        newRevealed.add(key);
-        if (newFlagged.has(key)) {
-          newFlagged.delete(key);
-        }
-        visited.add(key);
+        newRevealed.add(cellKey);
+        if (newFlagged.has(cellKey)) newFlagged.delete(cellKey);
+        visited.add(cellKey);
 
         if (cell.isMine) {
-          const clickedBomb = { row: r, col: c };
-          revealMineCoords.forEach((coords) => newRevealed.add(coords));
-          newFlagged.forEach((coords) => newRevealed.add(coords));
-
+          mineCoords.forEach((coords) => newRevealed.add(coords));
           return {
             ...state,
             gameState: GAME_STATE.LOST,
             revealed: newRevealed,
-            clickedBomb,
+            clickedBomb: { row: r, col: c },
           };
         }
-        if (cell.count === 0 && !cell.isMine) {
-          for (let dx = -1; dx <= 1; dx++) {
-            for (let dy = -1; dy <= 1; dy++) {
-              queue.push([r + dx, c + dy]);
-            }
-          }
+
+        if (cell.count === 0) {
+          for (let dx = -1; dx <= 1; dx++)
+            for (let dy = -1; dy <= 1; dy++) queue.push([r + dx, c + dy]);
         }
       }
 
-      const totalCells = numRows * numCols;
+      const totalCells = settings[level].N_ROW * settings[level].N_COL;
       const revealedCells = newRevealed.size;
-      const isWin = revealedCells === totalCells - numBombs;
-      newGameState = isWin ? GAME_STATE.WIN : newGameState;
+      const isWin = revealedCells === totalCells - settings[level].N_BOMBS;
+
       return {
         ...state,
         revealed: newRevealed,
-        gameState: newGameState,
+        gameState: isWin ? GAME_STATE.WIN : GAME_STATE.RUNNING,
         flagged: newFlagged,
       };
+    }
 
-    case 'TOGGLE_FLAG':
+    case 'TOGGLE_FLAG': {
       if (state.gameState !== GAME_STATE.RUNNING) return state;
-      const { N_BOMBS } = settings[state.level];
-      const { row: toggleRow, col: toggleCol } = action.payload;
-      const toggleKey = `${toggleRow},${toggleCol}`;
-      if (state.revealed.has(toggleKey)) return state;
-      const newFlaggedFlag = new Set(state.flagged);
-      if (newFlaggedFlag.has(toggleKey)) {
-        newFlaggedFlag.delete(toggleKey);
-      } else {
-        if (newFlaggedFlag.size < N_BOMBS) newFlaggedFlag.add(toggleKey);
-      }
 
-      return { ...state, flagged: newFlaggedFlag };
+      const { row, col } = action.payload;
+      const key = `${row},${col}`;
+      if (state.revealed.has(key)) return state;
+
+      const newFlagged = new Set(state.flagged);
+      if (newFlagged.has(key)) newFlagged.delete(key);
+      else if (newFlagged.size < settings[state.level].N_BOMBS)
+        newFlagged.add(key);
+
+      return { ...state, flagged: newFlagged };
+    }
 
     case 'RESET_GAME':
-      const currentLevel = state.level;
-      return { ...initializeState(currentLevel) };
+      return initializeState(state.level);
 
     case 'CHANGE_LEVEL':
-      const newLevel = action.payload;
-      return { ...initializeState(newLevel) };
+      return initializeState(action.payload);
+
     case 'TICK':
       if (state.gameState === GAME_STATE.RUNNING)
         return { ...state, time: state.time + 1 };
       return state;
 
     default:
-      throw new Error('Unknown action');
+      throw new Error(`Unknown action type: ${action.type}`);
   }
 }
 
-const borderStyle = (borderSize = 4) =>
-  `border-b-${borderSize} border-l-${borderSize} border-r-${borderSize} border-t-${borderSize} border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white`;
-
-const sunkenBorderStyle = (borderSize = 2) =>
-  `border-b-${borderSize} border-l-${borderSize} border-r-${borderSize} border-t-${borderSize} border-b-white border-l-[#7a7a7a] border-r-white border-t-[#7a7a7a]`;
-
 function MineSweeper() {
   const [state, dispatch] = useReducer(reducer, 'beginner', initializeState);
+  const [onPress, setOnPress] = useState(false);
   const { level, flagged, gameState, time, board, revealed, clickedBomb } =
     state;
   const { N_ROW, N_BOMBS } = settings[level];
@@ -253,27 +173,27 @@ function MineSweeper() {
   return (
     <WindowWithMenu dispatch={dispatch}>
       <div
-        className={`m-0 inline-flex flex-col gap-2 bg-[#c0c0c0] ${borderStyle()}`}
+        className={`m-0 inline-flex flex-col gap-2 bg-[#c0c0c0] ${borderStyle}`}
       >
         <div
-          className={`flex justify-between px-1.5 py-1 ${sunkenBorderStyle(2)}`}
+          className={`flex justify-between px-1.5 py-1 ${sunkenBorderStyle2}`}
         >
           <NumberStyle number={remainingBombs} />
-          <EmojiButton gameState={gameState} dispatch={dispatch} />
+          <EmojiButton
+            gameState={gameState}
+            dispatch={dispatch}
+            onPress={onPress}
+          />
           <StopWatch gameState={gameState} dispatch={dispatch} time={time} />
         </div>
-        <div className={`inline-block ${sunkenBorderStyle(4)}`}>
+        <div className={`inline-block ${sunkenBorderStyle4}`}>
           {fixedArrayRow.map((row) => (
             <Row
               key={row}
               row={row}
               dispatch={dispatch}
-              revealed={revealed}
-              flagged={flagged}
-              board={board}
-              level={level}
-              clickedBomb={clickedBomb}
-              gameState={gameState}
+              boardState={state}
+              setOnPress={setOnPress}
             />
           ))}
         </div>
@@ -293,8 +213,8 @@ function StopWatch({ gameState, dispatch, time }) {
   return <NumberStyle number={time} />;
 }
 
-function EmojiButton({ gameState, dispatch }) {
-  const emoji = (() => {
+function EmojiButton({ gameState, dispatch, onPress }) {
+  let emoji = (() => {
     switch (gameState) {
       case GAME_STATE.RUNNING:
         return emojiPaths.smile;
@@ -308,26 +228,22 @@ function EmojiButton({ gameState, dispatch }) {
         return emojiPaths.smile;
     }
   })();
+  if (onPress) {
+    emoji = emojiPaths.ohh;
+  }
 
   return (
     <div
-      className={`${borderStyle()} m-1 flex h-7 w-7 items-center justify-center active:bg-[#7a7a7a]`}
+      className={`${borderStyle} m-1 flex h-7 w-7 items-center justify-center active:bg-[#7a7a7a]`}
       onClick={() => dispatch({ type: 'RESET_GAME' })}
     >
       <img src={emoji} alt="emoji" />
     </div>
   );
 }
-const Row = function Row({
-  row,
-  dispatch,
-  revealed,
-  flagged,
-  board,
-  level,
-  gameState,
-  clickedBomb,
-}) {
+const Row = function Row({ row, dispatch, boardState, setOnPress }) {
+  const { revealed, flagged, board, level, gameState, clickedBomb } =
+    boardState;
   const { N_COL } = settings[level];
   const fixedArrayCol = Array.from(Array(N_COL).keys());
   return (
@@ -345,6 +261,7 @@ const Row = function Row({
             isFlagged={flagged.has(key)}
             dispatch={dispatch}
             board={board}
+            setOnPress={setOnPress}
           />
         );
       })}
@@ -361,6 +278,7 @@ function Cell({
   isFlagged,
   gameState,
   clickedBomb,
+  setOnPress,
 }) {
   const cell = board[row][col];
   let baseContent = null;
@@ -382,7 +300,6 @@ function Cell({
         ? CellStates.BOMB
         : cell.count || CellStates.EMPTY;
   }
-  // Overlay content
   if (isMisflag) {
     overlayContent = CellStates.MISFLAG;
   } else if (showFlag) {
@@ -402,15 +319,17 @@ function Cell({
       onContextMenu={handleRightClick}
       onClick={handleClick}
       disabled={isLost || gameState === GAME_STATE.WIN}
+      onMouseDown={() => setOnPress(true)}
+      onMouseUp={() => setOnPress(false)}
       className={`flex h-5 w-5 select-none items-center justify-center ${
         !isRevealed && !isFlagged && gameState === GAME_STATE.RUNNING
           ? 'active:bg-[#7a7a7a]'
           : ''
-      } ${isRevealed ? 'border-[0.5px] border-[#7a7a7a]' : borderStyle(4)}`}
+      } ${isRevealed ? 'border-[0.5px] border-[#7a7a7a]' : borderStyle}`}
     >
       {overlayContent && (
         <img
-          className="left-0 top-0 h-full w-full"
+          className="left-0 top-0 m-0 h-full w-full"
           src={flagPaths[overlayContent]}
           alt="flag"
         ></img>
@@ -430,7 +349,7 @@ function NumberStyle({ number }) {
   let numberStr = String(number).padStart(3, '0');
 
   return (
-    <div className={`flex ${sunkenBorderStyle()}`}>
+    <div className={`flex ${sunkenBorderStyle2}`}>
       <img
         className="h-8 w-auto"
         src={numberPaths[numberStr[0]]}

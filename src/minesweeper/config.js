@@ -1,6 +1,7 @@
 const flagPath = 'assets/minesweeper/flag';
 const emojiPath = 'assets/minesweeper/emoji';
 const numberPath = 'assets/minesweeper/number';
+
 export const CellStates = {
   FLAG: 'flag',
   BOMB: 'bomb',

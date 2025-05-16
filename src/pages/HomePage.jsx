@@ -3,6 +3,7 @@ import Chicken from '../components/chicken/Chicken';
 import Footer from '../ui/Footer';
 import DesktopIcon from '../components/desktop/DesktopIcon';
 import CommandPrompt from '../components/desktop/CommandPrompt';
+import MineSweeper from '../minesweeper/MineSweeper';
 
 function HomePage() {
   return (
@@ -11,6 +12,7 @@ function HomePage() {
         <div className="flex-1 overflow-auto p-3">
           <DesktopApps />
         </div>
+        <MineSweeper />
         <CommandPrompt />
         <Chicken />
         {/* <ToDoListPage /> */}
