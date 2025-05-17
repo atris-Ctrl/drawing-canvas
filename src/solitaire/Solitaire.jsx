@@ -7,6 +7,8 @@ import {
   isBlack,
   initialState,
   LOCATIONS,
+  findValidSpot,
+  checkWin,
 } from './config';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -28,11 +30,15 @@ function reducer(state, action) {
         cardIndex: flipCardIndex,
         location: flipLocation,
       } = action.payload;
+
       if (flipLocation !== LOCATIONS.TABLEAU) return;
       const { tableau: flipTableau } = state;
+
       const newFlipTableau = [...flipTableau];
       const flipPile = [...flipTableau[flipPileIndex]];
+
       const flipCard = { ...flipPile[flipCardIndex], faceUp: true };
+      if (flipCardIndex !== flipPile.length - 1) return state;
       flipPile[flipCardIndex] = flipCard;
       newFlipTableau[flipPileIndex] = flipPile;
       return { ...state, tableau: newFlipTableau };
@@ -57,36 +63,61 @@ function reducer(state, action) {
       return state;
 
     case ACTIONS.MOVE_CARD:
-      return state;
-    case ACTIONS.MOVE_TO_FOUNDATION:
-      const { foundation, tableau, waste } = state;
-      const { index, card, from, pileIndex, cardIndex } = action.payload;
+      const {
+        tableau: currentTableau,
+        foundation: currentFoundation,
+        waste: currentWaste,
+      } = state;
+      const {
+        card: currentCard,
+        from,
+        pileIndex: fromIndex,
+        cardIndex,
+      } = action.payload;
+      const validSpot = findValidSpot(
+        currentCard,
+        currentTableau,
+        currentFoundation,
+      );
+      if (!validSpot) return state;
+      const { location: to, index: toIndex } = validSpot;
 
-      if (!card?.faceUp) return state;
-      const newFoundation = [...foundation];
-      const newTableau = [...tableau];
-      const newWaste = [...waste];
-
+      if (!currentCard?.faceUp) return state;
+      const newFoundation = [...currentFoundation];
+      const newTableau = [...currentTableau];
+      const newWaste = [...currentWaste];
+      let moveCards = [currentCard];
+      // one card in tableau => waste
       if (from === LOCATIONS.TABLEAU) {
-        const newPile = [...newTableau[pileIndex]];
-        newTableau[pileIndex] = newPile.slice(0, cardIndex);
-      } else if (from === LOCATIONS.WASTE) {
-        newWaste.shift();
-      } else {
-        return state;
+        const newPile = [...newTableau[fromIndex]];
+
+        const remainingPile = newPile.slice(0, cardIndex);
+        moveCards = newPile.slice(cardIndex);
+        newTableau[fromIndex] = remainingPile;
+      } else if (from === LOCATIONS.WASTE) newWaste.shift();
+      else if (from === LOCATIONS.FOUNDATION) {
+        newFoundation[fromIndex].pop();
       }
-      newFoundation[index].push(card);
-      console.log(newFoundation);
+
+      if (to === LOCATIONS.FOUNDATION)
+        newFoundation[toIndex].push(...moveCards);
+      else if (to === LOCATIONS.TABLEAU) newTableau[toIndex].push(...moveCards);
+
+      const isWin = checkWin(newFoundation);
+      const newGameState = isWin ? GAME_STATE.WIN : state.gameState;
       return {
         ...state,
+        gameState: newGameState,
         foundation: newFoundation,
         tableau: newTableau,
         waste: newWaste,
       };
+    case ACTIONS.RESET:
+      const resetState = init(initialState);
+      return resetState;
     case ACTIONS.TICK:
       if (state.gameState !== GAME_STATE.RUNNING) return state;
       return { ...state, time: state.time + 1 };
-
     default:
       throw new Error('Unknown action type');
   }
@@ -99,8 +130,11 @@ function Solitaire() {
     <DndProvider backend={HTML5Backend}>
       <div className="inline-block w-full bg-green-800 p-6 font-mono text-white">
         <div className="mb-8 flex justify-between">
+          {/* <button onClick={() => dispatch({ type: ACTIONS.RESET })}>
+            Reset
+          </button> */}
           <div className="flex gap-4">
-            <Stock stock={stock} waste={waste} dispatch={dispatch} />
+            <Stock stock={stock} dispatch={dispatch} />
             <Waste cards={waste} dispatch={dispatch} />
           </div>
           <Foundation foundation={foundation} dispatch={dispatch} />
@@ -152,7 +186,7 @@ function Pile({ cards, dispatch, pileIndex }) {
   );
 }
 
-function Stock({ stock, dispatch, waste }) {
+function Stock({ dispatch, stock }) {
   function handleClick() {
     dispatch({ type: ACTIONS.DRAW });
   }
@@ -161,7 +195,9 @@ function Stock({ stock, dispatch, waste }) {
     <div
       onClick={handleClick}
       className="flex h-[90px] w-[60px] items-center justify-center rounded border border-white bg-blue-900 shadow-md"
-    ></div>
+    >
+      {stock.length === 0 && 'X'}
+    </div>
   );
 }
 
@@ -176,6 +212,8 @@ function Waste({ cards, dispatch }) {
         dispatch={dispatch}
         card={card}
         location={LOCATIONS.WASTE}
+        pileIndex={0}
+        cardIndex={0}
         className="absolute transition-all duration-200"
       />
     </div>
@@ -190,7 +228,6 @@ function Foundation({ foundation, dispatch }) {
   //     [],
   //   );
 
-  console.log('FOUNDATION', foundation);
   return (
     <div className="flex gap-4">
       {foundation.map((pile, i) => (
@@ -205,6 +242,8 @@ function Foundation({ foundation, dispatch }) {
               dispatch={dispatch}
               card={pile[pile.length - 1]}
               location={LOCATIONS.FOUNDATION}
+              pileIndex={i}
+              cardIndex={pile.length - 1}
             />
           )}
         </div>
@@ -232,8 +271,8 @@ function Card({ card, dispatch, location, pileIndex, cardIndex }) {
       return;
     }
     dispatch({
-      type: ACTIONS.MOVE_TO_FOUNDATION,
-      payload: { index: 0, from: location, card, pileIndex, cardIndex },
+      type: ACTIONS.MOVE_CARD,
+      payload: { from: location, card, pileIndex, cardIndex },
     });
   }
   const color = isBlack(suit) ? 'text-black' : 'text-red-600';
@@ -244,7 +283,7 @@ function Card({ card, dispatch, location, pileIndex, cardIndex }) {
       onClick={(e) => handleClick(e)}
       className={`flex h-[90px] w-[60px] items-center justify-center rounded border border-black bg-white shadow-md ${
         faceUp ? color : 'bg-blue-800'
-      } ${true ? 'opacity-50' : 'opacity-100'} `}
+      } ${isDragging ? 'opacity-50' : 'opacity-100'} `}
     >
       {faceUp ? (
         <span>

@@ -5,10 +5,21 @@ const numCards = 52;
 export const ACTIONS = {
   DEAL: 'deal',
   DRAW: 'draw',
-  MOVE_TO_FOUNDATION: 'move_to_foundation',
   MOVE_CARD: 'move_card',
   FLIP_CARD: 'flip_card',
   TICK: 'tick',
+  RESET: 'reset',
+};
+
+const scoreMap = {
+  MOVE_CARD: {
+    WASTE_TO_TABLEAU: 5,
+    WASTE_TO_FOUNDATION: 10,
+    TABLEAU_TO_FOUNDATION: 10,
+    FOUNDATION_TO_TABLEAU: -15,
+  },
+  FLIP_CARD: 10,
+  DRAW_FINISH: -100,
 };
 
 export const LOCATIONS = {
@@ -53,8 +64,15 @@ export function canMoveCard(card, topCard) {
   return isDifferent && isNextNumber;
 }
 
-function findValidSpot(card, tableau, foundation) {
+export function findValidSpot(card, tableau, foundation) {
   if (!card.faceUp) return;
+  // MOVE TO FOUNDATION
+  for (let col = 0; col < foundation.length; col++) {
+    const deck = foundation[col];
+    if (canMoveFoundation(card, deck)) {
+      return { location: LOCATIONS.FOUNDATION, index: col };
+    }
+  }
   // MOVE TO ANOTHER PILE
   for (let col = 0; col < tableau.length; col++) {
     const currentPile = tableau[col];
@@ -64,20 +82,15 @@ function findValidSpot(card, tableau, foundation) {
         index: col,
       };
   }
-  // MOVE TO FOUNDATION
-  for (let col = 0; col < foundation.length; col++) {
-    const deck = foundation[col];
-    if (canMoveFoundation(card, deck)) {
-      return { location: LOCATIONS.FOUNDATION, index: col };
-    }
-  }
   return null;
 }
 
 function canMovePile(card, pile) {
-  const { value, suit } = card;
+  const { value } = card;
 
-  if (pile.length === 0 && value === 13) return true;
+  if (pile.length === 0)
+    if (value === 13) return true;
+    else return false;
 
   const topCard = pile[pile.length - 1];
   return canMoveCard(card, topCard);
@@ -91,6 +104,20 @@ export function canMoveFoundation(card, pile) {
   const topCard = pile[pile.length - 1];
 
   return suit === topCard.suit && value === topCard.value + 1;
+}
+
+export function checkWin(foundation) {
+  const cardsInFoundation = foundation.reduce(
+    (acc, pile) => acc + pile.length,
+    0,
+  );
+
+  console.log(cardsInFoundation);
+  return numCards === cardsInFoundation;
+}
+
+export function getFinalScore(score, time) {
+  return (score * 700000) / time;
 }
 
 export function createDeck() {
@@ -126,5 +153,12 @@ export function init(initialState) {
     }
   }
 
-  return { ...initialState, stock: deck, tableau };
+  return {
+    ...initialState,
+    stock: deck,
+    tableau,
+    score: 0,
+    time: 0,
+    foundation: [[], [], [], []],
+  };
 }
