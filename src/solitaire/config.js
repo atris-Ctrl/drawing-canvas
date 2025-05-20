@@ -1,6 +1,23 @@
 const suits = ['♠', '♥', '♦', '♣'];
 export const numPiles = 7;
 const numCards = 52;
+const cardPath = 'assets/solitaire/cards';
+export const cardPaths = {};
+
+suits.forEach((suit) => {
+  for (let val = 0; val < 13; val++) {
+    const suitName =
+      suit === '♠'
+        ? 'Spade'
+        : suit === '♥'
+          ? 'Heart'
+          : suit === '♦'
+            ? 'Diamond'
+            : 'Club';
+    const cardName = `${val}_of_${suitName}`;
+    cardPaths[`${suit}-${val}`] = `${cardPath}/${cardName}.png`;
+  }
+});
 
 export const ACTIONS = {
   DEAL: 'deal',

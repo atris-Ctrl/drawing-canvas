@@ -18,9 +18,11 @@ import {
   useDraggable,
   useDroppable,
 } from '@dnd-kit/core';
+import WindowWithMenu from '../minesweeper/WindowWithMenu';
 
 //TODO:
 // DRAG AND DROP FUNCTION
+// drag multiple, stop override the onclick function, stop non reveealed card drag
 // DRAW THREE / ONE IN DEAL
 // RESET FUNCTION
 // SCORE FUNCTION, STOPWATCH FUNCTION
@@ -361,8 +363,9 @@ function Foundation({ foundation, dispatch }) {
   );
 }
 
-function Draggable({ children, id, data, disabled = false }) {
-  if (disabled) return children;
+function Draggable({ children, id, data, disabled }) {
+  // giving react error???
+  //   if (disabled) return children;
 
   const { attributes, listeners, setNodeRef, transform, setActivatorNodeRef } =
     useDraggable({
