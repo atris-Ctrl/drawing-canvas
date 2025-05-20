@@ -7,6 +7,7 @@ export const ACTIONS = {
   DRAW: 'draw',
   MOVE_CARD: 'move_card',
   FLIP_CARD: 'flip_card',
+  DRAG_CARD: 'drag_card',
   TICK: 'tick',
   RESET: 'reset',
 };
@@ -112,7 +113,6 @@ export function checkWin(foundation) {
     0,
   );
 
-  console.log(cardsInFoundation);
   return numCards === cardsInFoundation;
 }
 
