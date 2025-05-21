@@ -7,9 +7,8 @@ export const cardBackPaths = {};
 export const cardSlotPaths = {};
 
 for (let i = 0; i <= 11; i++) {
-  cardBackPaths[`CardBack_${i}`] = `${cardPath}/Back/CardBack_${i}.png`;
+  cardBackPaths[i] = `${cardPath}/Back/CardBack_${i}.png`;
 }
-
 for (let i = 0; i < 3; i++) {
   cardSlotPaths[i] = `${cardPath}/Slot/CardSlot_${i}.png`;
 }
@@ -62,17 +61,6 @@ export const GAME_STATE = {
   WIN: 'win',
 };
 
-export const initialState = {
-  stock: [],
-  waste: [],
-  foundation: [[], [], [], []],
-  tableau: [[], [], [], [], [], [], []],
-  score: 0,
-  time: 0,
-  drawNum: 1,
-  gameState: GAME_STATE.IDLE,
-};
-
 export const ItemTypes = {
   CARD: 'card',
   LIST: 'list',
@@ -113,7 +101,7 @@ export function findValidSpot(card, tableau, foundation) {
   return null;
 }
 
-function canMovePile(card, pile) {
+export function canMovePile(card, pile) {
   const { value } = card;
 
   if (pile.length === 0)
@@ -167,7 +155,7 @@ export function createDeck() {
     .map(({ value }) => value);
 }
 
-export function init(initialState) {
+export function init() {
   const deck = createDeck();
   const tableau = Array(numPiles)
     .fill(null)
@@ -175,17 +163,29 @@ export function init(initialState) {
   for (let i = 0; i < numPiles; i++) {
     for (let j = 0; j <= i; j++) {
       const card = deck.pop();
-      card.faceUp = i === j; // only top card face up
+      card.faceUp = i === j;
       tableau[i].push(card);
     }
   }
 
   return {
-    ...initialState,
     stock: deck,
     tableau,
+    foundation: [[], [], [], []],
+    waste: [],
+    gameState: GAME_STATE.READY,
     score: 0,
     time: 0,
-    foundation: [[], [], [], []],
+    drawNum: 1,
   };
 }
+export const initialState = {
+  stock: [],
+  waste: [],
+  foundation: [[], [], [], []],
+  tableau: [[], [], [], [], [], [], []],
+  score: 0,
+  time: 0,
+  drawNum: 1,
+  gameState: GAME_STATE.IDLE,
+};

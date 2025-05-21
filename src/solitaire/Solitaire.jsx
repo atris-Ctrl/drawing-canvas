@@ -1,11 +1,8 @@
 import { useEffect, useReducer, useState } from 'react';
 import {
-  ItemTypes,
   ACTIONS,
   GAME_STATE,
   init,
-  isBlack,
-  initialState,
   LOCATIONS,
   findValidSpot,
   checkWin,
@@ -13,7 +10,7 @@ import {
   canMoveCard,
   cardSlotPaths,
   cardBackPaths,
-  isFaceUp,
+  canMovePile,
 } from './config';
 import {
   DndContext,
@@ -31,7 +28,6 @@ import Card from './Card';
 // DRAG AND DROP FUNCTION
 // drag multiple
 // DRAW THREE / ONE IN DEAL
-// RESET FUNCTION
 // SCORE FUNCTION, STOPWATCH FUNCTION
 
 function reducer(state, action) {
@@ -94,8 +90,7 @@ function reducer(state, action) {
         if (!canMoveFoundation(card, dragFoundation[toDestIndex])) return state;
       } else if (toLocation === LOCATIONS.TABLEAU) {
         const currentPile = dragTableau[toDestIndex];
-        if (!canMoveCard(card, currentPile[currentPile.length - 1]))
-          return state;
+        if (!canMovePile(card, currentPile)) return state;
       }
 
       if (fromLocation === LOCATIONS.TABLEAU) {
@@ -175,7 +170,7 @@ function reducer(state, action) {
         waste: newWaste,
       };
     case ACTIONS.RESET:
-      const resetState = init(initialState);
+      const resetState = init();
       return resetState;
     case ACTIONS.TICK:
       if (state.gameState !== GAME_STATE.RUNNING) return state;
@@ -186,7 +181,7 @@ function reducer(state, action) {
 }
 
 function Solitaire() {
-  const [state, dispatch] = useReducer(reducer, initialState, init);
+  const [state, dispatch] = useReducer(reducer, undefined, init);
   const sensors = useSensors(
     useSensor(MouseSensor),
     useSensor(PointerSensor, {
@@ -197,8 +192,8 @@ function Solitaire() {
   );
 
   const { stock, tableau, foundation, waste, time, gameState, score } = state;
-  function handleDrag(e) {
-    const { active, over } = e;
+  function handleDrag({ active, over }) {
+    console.log(active, over);
     if (active && over) {
       const cardDragged = active.data.current;
       const droppable = over.data.current;
@@ -231,9 +226,9 @@ function Solitaire() {
     >
       <div className="inline-block w-full bg-green-800 p-6 font-mono text-white">
         <div className="mb-8 flex justify-between">
-          {/* <button onClick={() => dispatch({ type: ACTIONS.RESET })}>
+          <button onClick={() => dispatch({ type: ACTIONS.RESET })}>
             Reset
-          </button> */}
+          </button>
           <div className="flex gap-4">
             <Stock stock={stock} dispatch={dispatch} />
             <Waste cards={waste} dispatch={dispatch} />
@@ -243,12 +238,23 @@ function Solitaire() {
 
         <Tableau tableau={tableau} dispatch={dispatch} />
 
-        <div className="mt-8 flex">
-          <div>Score: {score} &nbsp;&nbsp;</div>
-          <StopWatch time={time} dispatch={dispatch} gameState={gameState} />
-        </div>
+        <ScoreAndTime
+          score={score}
+          time={time}
+          dispatch={dispatch}
+          gameState={gameState}
+        />
       </div>
     </DndContext>
+  );
+}
+
+function ScoreAndTime({ score, time, dispatch, gameState }) {
+  return (
+    <div className="mt-8 flex">
+      <div>Score: {score} &nbsp;&nbsp;</div>
+      <StopWatch time={time} dispatch={dispatch} gameState={gameState} />
+    </div>
   );
 }
 
@@ -261,43 +267,70 @@ function Tableau({ tableau, dispatch }) {
     </div>
   );
 }
-
 function Pile({ cards, dispatch, pileIndex }) {
+  const cardHeight = 90;
+  const cardWidth = 60;
+  const faceUpOffset = 13;
+  const faceDownOffset = 5;
+
+  const cardOffsets = [];
+  let offset = 0;
+  cards.forEach((card) => {
+    cardOffsets.push(offset);
+    offset += card.faceUp ? faceUpOffset : faceDownOffset;
+  });
+
   return (
     <div className="relative min-h-[300px] w-[60px]">
-      {cards.map((card, index) => (
+      {cards.map((card, index) => {
+        const cardComponent = (
+          <Card
+            dispatch={dispatch}
+            pileIndex={pileIndex}
+            cardIndex={index}
+            card={card}
+            location={LOCATIONS.TABLEAU}
+          />
+        );
+
+        return (
+          <div
+            key={card.id}
+            className="absolute left-0"
+            style={{
+              top: `${cardOffsets[index]}px`,
+              zIndex: index,
+            }}
+          >
+            {index === cards.length - 1 ? (
+              <Droppable
+                id={`pile-${pileIndex}`}
+                data={{ index: pileIndex, location: LOCATIONS.TABLEAU }}
+              >
+                {cardComponent}
+              </Droppable>
+            ) : (
+              cardComponent
+            )}
+          </div>
+        );
+      })}
+
+      {cards.length === 0 && (
         <div
-          key={card.id}
           className="absolute left-0"
           style={{
-            top: `${card.faceUp ? index * 13 : index * 5}px`,
-            zIndex: index,
+            top: `0px`,
+            height: `${cardHeight}px`,
+            width: `${cardWidth}px`,
           }}
         >
-          {index === cards.length - 1 ? (
-            <Droppable
-              id={card.id}
-              data={{ index: pileIndex, location: LOCATIONS.TABLEAU }}
-            >
-              <Card
-                dispatch={dispatch}
-                pileIndex={pileIndex}
-                cardIndex={index}
-                card={card}
-                location={LOCATIONS.TABLEAU}
-              />
-            </Droppable>
-          ) : (
-            <Card
-              dispatch={dispatch}
-              pileIndex={pileIndex}
-              cardIndex={index}
-              card={card}
-              location={LOCATIONS.TABLEAU}
-            />
-          )}
+          <Droppable
+            id={`pile-${pileIndex}`}
+            data={{ index: pileIndex, location: LOCATIONS.TABLEAU }}
+          />
         </div>
-      ))}
+      )}
     </div>
   );
 }
@@ -311,7 +344,7 @@ function Stock({ dispatch, stock }) {
       {stock.length === 0 ? (
         <img src={cardSlotPaths[0]}></img>
       ) : (
-        <img src={cardBackPaths['CardBack_0']}></img>
+        <img src={cardBackPaths[0]}></img>
       )}
     </div>
   );

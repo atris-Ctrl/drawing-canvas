@@ -6,6 +6,7 @@ function Card({ card, dispatch, location, pileIndex, cardIndex }) {
 
   function handleClick(e) {
     e.preventDefault();
+    console.log('click');
     if (!faceUp) {
       dispatch({
         type: ACTIONS.FLIP_CARD,
@@ -20,7 +21,7 @@ function Card({ card, dispatch, location, pileIndex, cardIndex }) {
   }
 
   const data = { location, pileIndex, cardIndex, card };
-  const cardPath = faceUp ? cardPaths[card.id] : cardBackPaths['CardBack_0'];
+  const cardPath = faceUp ? cardPaths[card.id] : cardBackPaths[0];
   return (
     <Draggable id={card.id} data={data} disabled={!card.faceUp}>
       <div
