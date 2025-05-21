@@ -11,18 +11,25 @@ import {
   checkWin,
   canMoveFoundation,
   canMoveCard,
+  cardSlotPaths,
+  cardBackPaths,
+  isFaceUp,
 } from './config';
 import {
   DndContext,
-  DragOverlay,
-  useDraggable,
-  useDroppable,
+  MouseSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
 } from '@dnd-kit/core';
-import WindowWithMenu from '../minesweeper/WindowWithMenu';
+
+import Droppable from './Droppable';
+import StopWatch from './StopWatch';
+import Card from './Card';
 
 //TODO:
 // DRAG AND DROP FUNCTION
-// drag multiple, stop override the onclick function, stop non reveealed card drag
+// drag multiple
 // DRAW THREE / ONE IN DEAL
 // RESET FUNCTION
 // SCORE FUNCTION, STOPWATCH FUNCTION
@@ -82,7 +89,7 @@ function reducer(state, action) {
       const dragTableau = [...state.tableau];
       const dragWaste = [...state.waste];
       let dragMoveCards = [card];
-
+      console.log(action.payload);
       if (toLocation === LOCATIONS.FOUNDATION) {
         if (!canMoveFoundation(card, dragFoundation[toDestIndex])) return state;
       } else if (toLocation === LOCATIONS.TABLEAU) {
@@ -180,11 +187,21 @@ function reducer(state, action) {
 
 function Solitaire() {
   const [state, dispatch] = useReducer(reducer, initialState, init);
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  );
+
   const { stock, tableau, foundation, waste, time, gameState, score } = state;
   function handleDrag(e) {
-    const cardDragged = e.active.data.current;
-    const droppable = e.over.data.current;
-    if (droppable && cardDragged) {
+    const { active, over } = e;
+    if (active && over) {
+      const cardDragged = active.data.current;
+      const droppable = over.data.current;
       const {
         location: fromLocation,
         pileIndex,
@@ -207,12 +224,16 @@ function Solitaire() {
     }
   }
   return (
-    <DndContext autoScroll={false} onDragEnd={(e) => handleDrag(e)}>
+    <DndContext
+      autoScroll={false}
+      onDragEnd={(e) => handleDrag(e)}
+      sensors={sensors}
+    >
       <div className="inline-block w-full bg-green-800 p-6 font-mono text-white">
         <div className="mb-8 flex justify-between">
-          <button onClick={() => dispatch({ type: ACTIONS.RESET })}>
+          {/* <button onClick={() => dispatch({ type: ACTIONS.RESET })}>
             Reset
-          </button>
+          </button> */}
           <div className="flex gap-4">
             <Stock stock={stock} dispatch={dispatch} />
             <Waste cards={waste} dispatch={dispatch} />
@@ -222,7 +243,7 @@ function Solitaire() {
 
         <Tableau tableau={tableau} dispatch={dispatch} />
 
-        <div className="mt-8">
+        <div className="mt-8 flex">
           <div>Score: {score} &nbsp;&nbsp;</div>
           <StopWatch time={time} dispatch={dispatch} gameState={gameState} />
         </div>
@@ -241,27 +262,6 @@ function Tableau({ tableau, dispatch }) {
   );
 }
 
-function Droppable({ children, id, data }) {
-  const { isOver, setNodeRef } = useDroppable({
-    id,
-    data,
-  });
-
-  const style = {
-    color: isOver ? 'red' : undefined,
-  };
-
-  return (
-    <div
-      className="h-full w-full border border-red-400"
-      ref={setNodeRef}
-      style={style}
-    >
-      {children}
-    </div>
-  );
-}
-
 function Pile({ cards, dispatch, pileIndex }) {
   return (
     <div className="relative min-h-[300px] w-[60px]">
@@ -270,14 +270,14 @@ function Pile({ cards, dispatch, pileIndex }) {
           key={card.id}
           className="absolute left-0"
           style={{
-            top: `${index * 15}px`,
+            top: `${card.faceUp ? index * 13 : index * 5}px`,
             zIndex: index,
           }}
         >
           {index === cards.length - 1 ? (
             <Droppable
               id={card.id}
-              data={{ index: index, location: 'tableau' }}
+              data={{ index: pileIndex, location: LOCATIONS.TABLEAU }}
             >
               <Card
                 dispatch={dispatch}
@@ -303,16 +303,16 @@ function Pile({ cards, dispatch, pileIndex }) {
 }
 
 function Stock({ dispatch, stock }) {
-  function handleClick() {
-    dispatch({ type: ACTIONS.DRAW });
-  }
-
   return (
     <div
-      onClick={handleClick}
-      className="flex h-[90px] w-[60px] items-center justify-center rounded border border-white bg-blue-900 shadow-md"
+      onClick={() => dispatch({ type: ACTIONS.DRAW })}
+      className="flex h-[90px] w-[60px] items-center justify-center rounded shadow-md"
     >
-      {stock.length === 0 && 'X'}
+      {stock.length === 0 ? (
+        <img src={cardSlotPaths[0]}></img>
+      ) : (
+        <img src={cardBackPaths['CardBack_0']}></img>
+      )}
     </div>
   );
 }
@@ -322,7 +322,7 @@ function Waste({ cards, dispatch }) {
   const card = cards[0];
 
   return (
-    <div className="relative h-[90px] w-[120px]">
+    <div className="relative h-[90px] w-[60px]">
       <Card
         key={card.id}
         dispatch={dispatch}
@@ -338,15 +338,15 @@ function Waste({ cards, dispatch }) {
 
 function Foundation({ foundation, dispatch }) {
   return (
-    <div className="flex gap-4">
+    <div className="flex flex-shrink-0 gap-4">
       {foundation.map((pile, i) => (
         <div
           key={i}
-          className="flex h-[90px] w-[60px] items-center justify-center rounded border border-white bg-gray-500 shadow-inner"
+          className="flex h-[90px] w-[60px] flex-shrink-0 items-center justify-center rounded shadow-inner"
         >
-          <Droppable id={i} data={{ index: i, location: 'foundation' }}>
+          <Droppable id={i} data={{ index: i, location: LOCATIONS.FOUNDATION }}>
             {pile.length === 0 ? (
-              '♢'
+              <img src={cardSlotPaths[2]}></img>
             ) : (
               <Card
                 dispatch={dispatch}
@@ -361,87 +361,6 @@ function Foundation({ foundation, dispatch }) {
       ))}
     </div>
   );
-}
-
-function Draggable({ children, id, data, disabled }) {
-  // giving react error???
-  //   if (disabled) return children;
-
-  const { attributes, listeners, setNodeRef, transform, setActivatorNodeRef } =
-    useDraggable({
-      id,
-      data,
-    });
-  const style = transform
-    ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }
-    : undefined;
-
-  return (
-    <div ref={setNodeRef} style={style}>
-      <div
-        ref={setActivatorNodeRef}
-        {...listeners}
-        {...attributes}
-        style={{ width: '20px', height: '20px', cursor: 'grab' }}
-      >
-        ⠿
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function Card({ card, dispatch, location, pileIndex, cardIndex }) {
-  const { value, suit, faceUp } = card;
-
-  function handleClick(e) {
-    e.preventDefault();
-    if (!faceUp) {
-      dispatch({
-        type: ACTIONS.FLIP_CARD,
-        payload: { pileIndex, cardIndex, location },
-      });
-      return;
-    }
-    dispatch({
-      type: ACTIONS.MOVE_CARD,
-      payload: { from: location, card, pileIndex, cardIndex },
-    });
-  }
-  const color = isBlack(suit) ? 'text-black' : 'text-red-600';
-
-  const data = { location, pileIndex, cardIndex, card };
-  return (
-    <Draggable id={card.id} data={data} disabled={!card.faceUp}>
-      <div
-        onClick={(e) => handleClick(e)}
-        className={`flex h-[90px] w-[60px] items-center justify-center rounded border border-black bg-white shadow-md ${
-          faceUp ? color : 'bg-blue-800'
-        }`}
-      >
-        {faceUp ? (
-          <span>
-            {suit} {value}
-          </span>
-        ) : (
-          '?'
-        )}
-      </div>
-    </Draggable>
-  );
-}
-
-function StopWatch({ gameState, dispatch, time }) {
-  useEffect(() => {
-    let timer;
-    if (gameState === GAME_STATE.RUNNING)
-      timer = setInterval(() => dispatch({ type: ACTIONS.TICK }), 1000);
-    return () => clearInterval(timer);
-  }, [gameState]);
-
-  return <div>Time : {time}</div>;
 }
 
 export default Solitaire;

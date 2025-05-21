@@ -3,6 +3,16 @@ export const numPiles = 7;
 const numCards = 52;
 const cardPath = 'assets/solitaire/cards';
 export const cardPaths = {};
+export const cardBackPaths = {};
+export const cardSlotPaths = {};
+
+for (let i = 0; i <= 11; i++) {
+  cardBackPaths[`CardBack_${i}`] = `${cardPath}/Back/CardBack_${i}.png`;
+}
+
+for (let i = 0; i < 3; i++) {
+  cardSlotPaths[i] = `${cardPath}/Slot/CardSlot_${i}.png`;
+}
 
 suits.forEach((suit) => {
   for (let val = 0; val < 13; val++) {
@@ -14,8 +24,8 @@ suits.forEach((suit) => {
           : suit === '♦'
             ? 'Diamond'
             : 'Club';
-    const cardName = `${val}_of_${suitName}`;
-    cardPaths[`${suit}-${val}`] = `${cardPath}/${cardName}.png`;
+    const cardName = `${suitName}_${val}`;
+    cardPaths[`${suit}-${val}`] = `${cardPath}/${suitName}/${cardName}.png`;
   }
 });
 
@@ -107,7 +117,7 @@ function canMovePile(card, pile) {
   const { value } = card;
 
   if (pile.length === 0)
-    if (value === 13) return true;
+    if (value === 12) return true;
     else return false;
 
   const topCard = pile[pile.length - 1];
@@ -117,7 +127,7 @@ function canMovePile(card, pile) {
 export function canMoveFoundation(card, pile) {
   const { value, suit } = card;
   if (pile.length === 0) {
-    return value === 1;
+    return value === 0;
   }
   const topCard = pile[pile.length - 1];
 
@@ -142,7 +152,7 @@ export function createDeck() {
   const deck = [];
 
   suits.forEach((suit) => {
-    for (let val = 1; val <= 13; val++) {
+    for (let val = 0; val < 13; val++) {
       deck.push({
         suit,
         value: val,
