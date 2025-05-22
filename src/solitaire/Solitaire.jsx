@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useReducer, useState } from 'react';
 import {
   ACTIONS,
   GAME_STATE,
@@ -7,10 +7,10 @@ import {
   findValidSpot,
   checkWin,
   canMoveFoundation,
-  canMoveCard,
   cardSlotPaths,
   cardBackPaths,
   canMovePile,
+  scoreMap,
 } from './config';
 import {
   DndContext,
@@ -27,7 +27,6 @@ import Card from './Card';
 //TODO:
 // DRAG AND DROP FUNCTION
 // drag multiple
-// DRAW THREE / ONE IN DEAL
 // SCORE FUNCTION, STOPWATCH FUNCTION
 
 function reducer(state, action) {
@@ -50,10 +49,14 @@ function reducer(state, action) {
       if (flipCardIndex !== flipPile.length - 1) return state;
       flipPile[flipCardIndex] = flipCard;
       newFlipTableau[flipPileIndex] = flipPile;
-      return { ...state, tableau: newFlipTableau };
+      return {
+        ...state,
+        tableau: newFlipTableau,
+        gameState: GAME_STATE.RUNNING,
+      };
 
     case ACTIONS.DRAW:
-      const { stock: drawStock, waste: drawWaste } = state;
+      const { stock: drawStock, waste: drawWaste, drawNum } = state;
       if (drawStock.length === 0 && drawWaste.length > 0) {
         // Recycle waste back to stock (face down)
         const resetStock = drawWaste.map((card) => ({
@@ -64,10 +67,19 @@ function reducer(state, action) {
       }
 
       if (drawStock.length > 0) {
+        const numToDraw = Math.min(drawNum, drawStock.length);
         const newStock = [...drawStock];
-        const newCard = newStock.pop();
-        newCard.faceUp = true;
-        return { ...state, stock: newStock, waste: [newCard, ...drawWaste] };
+        const drawnCards = newStock
+          .splice(-numToDraw)
+          .map((card) => ({ ...card, faceUp: true }))
+          .reverse();
+
+        return {
+          ...state,
+          stock: newStock,
+          waste: [...drawnCards, ...drawWaste],
+          gameState: GAME_STATE.RUNNING,
+        };
       }
       return state;
 
@@ -85,7 +97,8 @@ function reducer(state, action) {
       const dragTableau = [...state.tableau];
       const dragWaste = [...state.waste];
       let dragMoveCards = [card];
-      console.log(action.payload);
+      let totalScore = 0;
+
       if (toLocation === LOCATIONS.FOUNDATION) {
         if (!canMoveFoundation(card, dragFoundation[toDestIndex])) return state;
       } else if (toLocation === LOCATIONS.TABLEAU) {
@@ -95,9 +108,10 @@ function reducer(state, action) {
 
       if (fromLocation === LOCATIONS.TABLEAU) {
         const newPile = [...dragTableau[pileIndex]];
-        const remainingPile = newPile.slice(0, fromCardIndex);
-        dragMoveCards = newPile.slice(fromCardIndex);
-        dragTableau[pileIndex] = remainingPile;
+
+        dragMoveCards = newPile.splice(fromCardIndex);
+
+        dragTableau[pileIndex] = newPile;
       } else if (fromLocation === LOCATIONS.WASTE) {
         dragWaste.shift();
       } else if (fromLocation === LOCATIONS.FOUNDATION) {
@@ -161,7 +175,8 @@ function reducer(state, action) {
       } else if (to === LOCATIONS.TABLEAU)
         newTableau[toIndex].push(...moveCards);
       const isWin = checkWin(newFoundation);
-      const newGameState = isWin ? GAME_STATE.WIN : state.gameState;
+
+      const newGameState = isWin ? GAME_STATE.WIN : GAME_STATE.RUNNING;
       return {
         ...state,
         gameState: newGameState,
@@ -172,6 +187,11 @@ function reducer(state, action) {
     case ACTIONS.RESET:
       const resetState = init();
       return resetState;
+
+    case ACTIONS.DEAL_NUM:
+      const deal = action.payload;
+      const reset = init();
+      return { ...reset, drawNum: deal };
     case ACTIONS.TICK:
       if (state.gameState !== GAME_STATE.RUNNING) return state;
       return { ...state, time: state.time + 1 };
@@ -191,9 +211,9 @@ function Solitaire() {
     }),
   );
 
-  const { stock, tableau, foundation, waste, time, gameState, score } = state;
+  const { stock, tableau, foundation, waste, time, gameState, score, drawNum } =
+    state;
   function handleDrag({ active, over }) {
-    console.log(active, over);
     if (active && over) {
       const cardDragged = active.data.current;
       const droppable = over.data.current;
@@ -226,12 +246,9 @@ function Solitaire() {
     >
       <div className="inline-block w-full bg-green-800 p-6 font-mono text-white">
         <div className="mb-8 flex justify-between">
-          <button onClick={() => dispatch({ type: ACTIONS.RESET })}>
-            Reset
-          </button>
           <div className="flex gap-4">
             <Stock stock={stock} dispatch={dispatch} />
-            <Waste cards={waste} dispatch={dispatch} />
+            <Waste cards={waste} dispatch={dispatch} drawNum={drawNum} />
           </div>
           <Foundation foundation={foundation} dispatch={dispatch} />
         </div>
@@ -254,6 +271,13 @@ function ScoreAndTime({ score, time, dispatch, gameState }) {
     <div className="mt-8 flex">
       <div>Score: {score} &nbsp;&nbsp;</div>
       <StopWatch time={time} dispatch={dispatch} gameState={gameState} />
+      <button onClick={() => dispatch({ type: ACTIONS.RESET })}>Reset</button>
+      <button onClick={() => dispatch({ type: ACTIONS.DEAL_NUM, payload: 1 })}>
+        DRAW ONE
+      </button>
+      <button onClick={() => dispatch({ type: ACTIONS.DEAL_NUM, payload: 3 })}>
+        DRAW THREE
+      </button>
     </div>
   );
 }
@@ -350,21 +374,32 @@ function Stock({ dispatch, stock }) {
   );
 }
 
-function Waste({ cards, dispatch }) {
+function Waste({ cards, dispatch, drawNum }) {
   if (cards.length === 0) return null;
-  const card = cards[0];
-
+  const currentDraw = Math.min(cards.length, drawNum);
+  const currentWaste = cards.slice(0, currentDraw).reverse();
   return (
     <div className="relative h-[90px] w-[60px]">
-      <Card
-        key={card.id}
-        dispatch={dispatch}
-        card={card}
-        location={LOCATIONS.WASTE}
-        pileIndex={0}
-        cardIndex={0}
-        className="absolute transition-all duration-200"
-      />
+      {currentWaste.map((card, index) => (
+        <div
+          key={card.id}
+          className="absolute"
+          style={{
+            left: `${index * 10}px`,
+            zIndex: index,
+          }}
+        >
+          <Card
+            dispatch={dispatch}
+            card={card}
+            location={LOCATIONS.WASTE}
+            pileIndex={0}
+            cardIndex={index}
+            className="transition-all duration-200"
+            disabled={!(index === currentWaste.length - 1)}
+          />
+        </div>
+      ))}
     </div>
   );
 }
@@ -379,7 +414,7 @@ function Foundation({ foundation, dispatch }) {
         >
           <Droppable id={i} data={{ index: i, location: LOCATIONS.FOUNDATION }}>
             {pile.length === 0 ? (
-              <img src={cardSlotPaths[2]}></img>
+              <img src={cardSlotPaths[2]} draggable={false}></img>
             ) : (
               <Card
                 dispatch={dispatch}

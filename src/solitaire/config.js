@@ -36,9 +36,10 @@ export const ACTIONS = {
   DRAG_CARD: 'drag_card',
   TICK: 'tick',
   RESET: 'reset',
+  DEAL_NUM: 'deal_num',
 };
 
-const scoreMap = {
+export const scoreMap = {
   MOVE_CARD: {
     WASTE_TO_TABLEAU: 5,
     WASTE_TO_FOUNDATION: 10,
@@ -73,7 +74,7 @@ export function isFaceUp(card) {
   return card.isFaceUp;
 }
 
-export function canMoveCard(card, topCard) {
+function canMoveCard(card, topCard) {
   if (!card.faceUp || !topCard.faceUp) return false;
   const isDifferent = isBlack(card.suit) !== isBlack(topCard.suit);
   const isNextNumber = card.value === topCard.value - 1;

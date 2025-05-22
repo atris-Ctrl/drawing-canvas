@@ -1,12 +1,19 @@
 import { ACTIONS, cardBackPaths, cardPaths } from './config';
 import Draggable from './Draggable';
 
-function Card({ card, dispatch, location, pileIndex, cardIndex }) {
+function Card({
+  card,
+  dispatch,
+  location,
+  pileIndex,
+  cardIndex,
+  disabled = false,
+}) {
   const { faceUp } = card;
 
   function handleClick(e) {
     e.preventDefault();
-    console.log('click');
+    if (disabled) return;
     if (!faceUp) {
       dispatch({
         type: ACTIONS.FLIP_CARD,
@@ -23,12 +30,12 @@ function Card({ card, dispatch, location, pileIndex, cardIndex }) {
   const data = { location, pileIndex, cardIndex, card };
   const cardPath = faceUp ? cardPaths[card.id] : cardBackPaths[0];
   return (
-    <Draggable id={card.id} data={data} disabled={!card.faceUp}>
+    <Draggable id={card.id} data={data} disabled={disabled || !card.faceUp}>
       <div
         onClick={(e) => handleClick(e)}
         className="flex h-[90px] w-[60px] items-center justify-center rounded shadow-md"
       >
-        <img src={cardPath} />
+        <img src={cardPath} draggable={false} />
       </div>
     </Draggable>
   );

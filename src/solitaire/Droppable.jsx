@@ -7,7 +7,7 @@ function Droppable({ children, id, data }) {
   });
 
   return (
-    <div className="h-full w-full border" ref={setNodeRef}>
+    <div className="h-full w-full" ref={setNodeRef}>
       {children}
     </div>
   );
