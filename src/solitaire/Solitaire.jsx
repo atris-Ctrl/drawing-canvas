@@ -11,6 +11,8 @@ import {
   cardBackPaths,
   canMovePile,
   scoreMap,
+  createDrawAction,
+  createDragAction,
 } from './config';
 import {
   DndContext,
@@ -23,11 +25,12 @@ import {
 import Droppable from './Droppable';
 import StopWatch from './StopWatch';
 import Card from './Card';
+import ScoreAndTime from './ScoreAndTime';
 
 //TODO:
 // DRAG AND DROP FUNCTION
 // drag multiple
-// SCORE FUNCTION, STOPWATCH FUNCTION
+// SCORE FUNCTION
 
 function reducer(state, action) {
   switch (action.type) {
@@ -225,17 +228,16 @@ function Solitaire() {
       } = cardDragged;
       const { index: toIndex, location: toLocation } = droppable;
 
-      dispatch({
-        type: ACTIONS.DRAG_CARD,
-        payload: {
+      dispatch(
+        createDragAction(
           fromLocation,
           pileIndex,
           cardIndex,
           card,
           toIndex,
           toLocation,
-        },
-      });
+        ),
+      );
     }
   }
   return (
@@ -263,22 +265,6 @@ function Solitaire() {
         />
       </div>
     </DndContext>
-  );
-}
-
-function ScoreAndTime({ score, time, dispatch, gameState }) {
-  return (
-    <div className="mt-8 flex">
-      <div>Score: {score} &nbsp;&nbsp;</div>
-      <StopWatch time={time} dispatch={dispatch} gameState={gameState} />
-      <button onClick={() => dispatch({ type: ACTIONS.RESET })}>Reset</button>
-      <button onClick={() => dispatch({ type: ACTIONS.DEAL_NUM, payload: 1 })}>
-        DRAW ONE
-      </button>
-      <button onClick={() => dispatch({ type: ACTIONS.DEAL_NUM, payload: 3 })}>
-        DRAW THREE
-      </button>
-    </div>
   );
 }
 
@@ -362,7 +348,7 @@ function Pile({ cards, dispatch, pileIndex }) {
 function Stock({ dispatch, stock }) {
   return (
     <div
-      onClick={() => dispatch({ type: ACTIONS.DRAW })}
+      onClick={() => dispatch(createDrawAction())}
       className="flex h-[90px] w-[60px] items-center justify-center rounded shadow-md"
     >
       {stock.length === 0 ? (

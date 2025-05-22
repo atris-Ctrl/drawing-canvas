@@ -6,6 +6,7 @@ export const cardPaths = {};
 export const cardBackPaths = {};
 export const cardSlotPaths = {};
 
+////////////////////
 for (let i = 0; i <= 11; i++) {
   cardBackPaths[i] = `${cardPath}/Back/CardBack_${i}.png`;
 }
@@ -28,8 +29,8 @@ suits.forEach((suit) => {
   }
 });
 
+//////////////////////////////
 export const ACTIONS = {
-  DEAL: 'deal',
   DRAW: 'draw',
   MOVE_CARD: 'move_card',
   FLIP_CARD: 'flip_card',
@@ -39,6 +40,40 @@ export const ACTIONS = {
   DEAL_NUM: 'deal_num',
 };
 
+export const createMoveAction = (location, card, pileIndex, cardIndex) => ({
+  type: ACTIONS.MOVE_CARD,
+  payload: { from: location, card, pileIndex, cardIndex },
+});
+export const createDrawAction = () => ({ type: ACTIONS.DRAW });
+export const createDragAction = (
+  fromLocation,
+  pileIndex,
+  cardIndex,
+  card,
+  toIndex,
+  toLocation,
+) => ({
+  type: ACTIONS.DRAG_CARD,
+  payload: {
+    fromLocation,
+    pileIndex,
+    cardIndex,
+    card,
+    toIndex,
+    toLocation,
+  },
+});
+export const createFlipAction = (pileIndex, cardIndex, location) => ({
+  type: ACTIONS.FLIP_CARD,
+  payload: { pileIndex, cardIndex, location },
+});
+export const createResetAction = () => ({ type: ACTIONS.RESET });
+export const createDealAction = (number) => ({
+  type: ACTIONS.DEAL_NUM,
+  payload: number,
+});
+
+////////////////////////////////////////
 export const scoreMap = {
   MOVE_CARD: {
     WASTE_TO_TABLEAU: 5,

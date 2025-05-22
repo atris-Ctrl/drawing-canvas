@@ -1,4 +1,10 @@
-import { ACTIONS, cardBackPaths, cardPaths } from './config';
+import {
+  ACTIONS,
+  cardBackPaths,
+  cardPaths,
+  createFlipAction,
+  createMoveAction,
+} from './config';
 import Draggable from './Draggable';
 
 function Card({
@@ -15,16 +21,10 @@ function Card({
     e.preventDefault();
     if (disabled) return;
     if (!faceUp) {
-      dispatch({
-        type: ACTIONS.FLIP_CARD,
-        payload: { pileIndex, cardIndex, location },
-      });
+      dispatch(createFlipAction(pileIndex, cardIndex, location));
       return;
     }
-    dispatch({
-      type: ACTIONS.MOVE_CARD,
-      payload: { from: location, card, pileIndex, cardIndex },
-    });
+    dispatch(createMoveAction(location, card, pileIndex, cardIndex));
   }
 
   const data = { location, pileIndex, cardIndex, card };
