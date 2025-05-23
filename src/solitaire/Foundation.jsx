@@ -1,4 +1,5 @@
-import Card from './Card';
+import Card from './CardComponent/Card';
+import CardImage from './CardComponent/CardImage';
 import { cardSlotPaths, LOCATIONS } from './config';
 import Droppable from './Droppable';
 
@@ -12,11 +13,7 @@ function Foundation({ foundation, dispatch }) {
         >
           <Droppable id={i} data={{ index: i, location: LOCATIONS.FOUNDATION }}>
             {pile.length === 0 ? (
-              <img
-                className="select-none"
-                src={cardSlotPaths[2]}
-                draggable={false}
-              ></img>
+              <CardImage cardPath={cardSlotPaths[2]} />
             ) : (
               <Card
                 dispatch={dispatch}

@@ -1,4 +1,4 @@
-import Card from './Card';
+import Card from './CardComponent/Card';
 import { LOCATIONS } from './config';
 
 function Waste({ cards, dispatch, drawNum }) {

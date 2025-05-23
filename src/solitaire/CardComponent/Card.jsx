@@ -1,10 +1,11 @@
+import CardImage from './CardImage';
 import {
   cardBackPaths,
   cardPaths,
   createFlipAction,
   createMoveAction,
-} from './config';
-import Draggable from './Draggable';
+} from '../config';
+import Draggable from '../Draggable';
 
 function Card({
   card,
@@ -12,13 +13,14 @@ function Card({
   location,
   pileIndex,
   cardIndex,
-  disabled = false,
+  hide = false,
+  disabledClick = false,
 }) {
   const { faceUp } = card;
 
   function handleClick(e) {
     e.preventDefault();
-    if (disabled) return;
+    if (disabledClick) return;
     if (!faceUp) {
       dispatch(createFlipAction(pileIndex, cardIndex, location));
       return;
@@ -29,12 +31,16 @@ function Card({
   const data = { location, pileIndex, cardIndex, card };
   const cardPath = faceUp ? cardPaths[card.id] : cardBackPaths[0];
   return (
-    <Draggable id={card.id} data={data} disabled={disabled || !card.faceUp}>
+    <Draggable
+      id={card.id}
+      data={data}
+      disabled={disabledClick || !card.faceUp}
+    >
       <div
         onClick={(e) => handleClick(e)}
-        className="flex h-[90px] w-[60px] items-center justify-center rounded shadow-md"
+        className="flex h-[90px] w-[60px] items-center justify-center"
       >
-        <img className="no-drag select-none" src={cardPath} />
+        {!hide && <CardImage cardPath={cardPath} />}
       </div>
     </Draggable>
   );

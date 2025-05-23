@@ -23,13 +23,14 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import Droppable from './Droppable';
-import Card from './Card';
+import Card from './CardComponent/Card';
 import ScoreAndTime from './ScoreAndTime';
 import Pile from './Pile';
 import Waste from './Waste';
 import Foundation from './Foundation';
 import Stock from './Stock';
 import Tableau from './Tableau';
+import StopWatch from './StopWatch';
 
 //TODO:
 // DRAG AND DROP FUNCTION
@@ -224,7 +225,6 @@ function Solitaire() {
     state;
   function handleDragStart({ active }) {
     if (!active) return;
-
     const { card, cardIndex, location, pileIndex } = active.data.current;
     if (location === LOCATIONS.TABLEAU) {
       const currentPile = tableau[pileIndex];
@@ -283,14 +283,9 @@ function Solitaire() {
         <DragOverlay>
           {activeId.length > 0 && <Pile cards={activeId} pileIndex={0} />}
         </DragOverlay>
-        <Tableau tableau={tableau} dispatch={dispatch} />
-
-        <ScoreAndTime
-          score={score}
-          time={time}
-          dispatch={dispatch}
-          gameState={gameState}
-        />
+        <Tableau activeId={activeId} tableau={tableau} dispatch={dispatch} />
+        <StopWatch time={time} dispatch={dispatch} gameState={gameState} />
+        <ScoreAndTime score={score} dispatch={dispatch} gameState={gameState} />
       </div>
     </DndContext>
   );

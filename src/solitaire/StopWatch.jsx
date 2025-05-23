@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ACTIONS, GAME_STATE } from './config';
 
 function formatTime(seconds) {
@@ -8,11 +8,18 @@ function formatTime(seconds) {
   return `${hrs}:${mins}:${secs}`;
 }
 
-function StopWatch({ gameState, dispatch, time }) {
+function StopWatch({ gameState, dispatch }) {
+  const [time, setTime] = useState(0);
   useEffect(() => {
     let timer;
-    if (gameState === GAME_STATE.RUNNING)
-      timer = setInterval(() => dispatch({ type: ACTIONS.TICK }), 1000);
+    if (gameState === GAME_STATE.RUNNING) {
+      timer = setInterval(() => {
+        setTime((time) => time + 1);
+        // Uncomment the following line if dispatch is needed
+        // dispatch({ type: ACTIONS.TICK });
+      }, 1000);
+    }
+
     return () => clearInterval(timer);
   }, [gameState]);
 
