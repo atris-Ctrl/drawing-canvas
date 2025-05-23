@@ -8,7 +8,6 @@ function Draggable({ children, id, data, disabled }) {
     setNodeRef,
     transform,
     transition,
-    setActivatorNodeRef,
     isDragging,
   } = useDraggable({
     id,
@@ -23,13 +22,7 @@ function Draggable({ children, id, data, disabled }) {
   };
 
   return (
-    <div
-      {...attributes}
-      {...listeners}
-      ref={setNodeRef}
-      style={style}
-      className="bg-slate-800"
-    >
+    <div {...attributes} {...listeners} ref={setNodeRef} style={style}>
       {children}
     </div>
   );

@@ -117,24 +117,30 @@ function canMoveCard(card, topCard) {
 }
 
 export function findValidSpot(card, tableau, foundation) {
+  const validSpots = findAllValidSpots(card, tableau, foundation);
+  return validSpots?.[0] ?? null;
+}
+
+export function findAllValidSpots(card, tableau, foundation) {
   if (!card.faceUp) return;
+  const allValidSpot = [];
   // MOVE TO FOUNDATION
   for (let col = 0; col < foundation.length; col++) {
     const deck = foundation[col];
     if (canMoveFoundation(card, deck)) {
-      return { location: LOCATIONS.FOUNDATION, index: col };
+      allValidSpot.push({ location: LOCATIONS.FOUNDATION, index: col });
     }
   }
   // MOVE TO ANOTHER PILE
   for (let col = 0; col < tableau.length; col++) {
     const currentPile = tableau[col];
     if (canMovePile(card, currentPile))
-      return {
+      allValidSpot.push({
         location: LOCATIONS.TABLEAU,
         index: col,
-      };
+      });
   }
-  return null;
+  return allValidSpot;
 }
 
 export function canMovePile(card, pile) {
@@ -225,3 +231,48 @@ export const initialState = {
   drawNum: 1,
   gameState: GAME_STATE.IDLE,
 };
+
+export function getValidMoves(gameState) {
+  // for all top cards in tableau and foundation and waste and stock
+  const allMoves = [];
+  const { stock, foundation, waste, tableau } = gameState;
+
+  for (let pile of foundation) {
+    if (pile.length === 0) continue;
+
+    const topCard = pile[pile.length - 1];
+    const validSpots = findAllValidSpots(topCard, tableau, foundation);
+  }
+
+  return allMoves;
+}
+
+function serializeGameState(state) {
+  return JSON.stringify({
+    tableau: state.tableau.map(
+      (card) => `${card.suit}${card.value}${card.faceUp ? 'U' : 'D'}`,
+    ),
+    stock: state.stock.map((card) => `${card.suit}${card.value}`),
+    waste: state.waste.map((card) => `${card.suit}${card.value}`),
+  });
+}
+function isWinning(gameState) {
+  return checkWin(gameState.foundation);
+}
+
+function simulateMove(gameState, move) {}
+
+export function isWinnable(gameState, visitedStates = new Set()) {
+  if (isWinning(gameState)) return true;
+  const key = serializeGameState(gameState);
+  if (visitedStates.has(key)) return false;
+
+  visitedStates.add(key);
+  const possibleMoves = getValidMoves(gameState);
+
+  for (let move of possibleMoves) {
+    const nextState = simulateMove(gameState, move);
+    if (isWinnable(nextState, visitedStates)) return true;
+  }
+  return false;
+}

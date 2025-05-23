@@ -16,19 +16,26 @@ import {
 } from './config';
 import {
   DndContext,
+  DragOverlay,
   MouseSensor,
   PointerSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-
 import Droppable from './Droppable';
-import StopWatch from './StopWatch';
 import Card from './Card';
 import ScoreAndTime from './ScoreAndTime';
+import Pile from './Pile';
+import Waste from './Waste';
+import Foundation from './Foundation';
+import Stock from './Stock';
+import Tableau from './Tableau';
 
 //TODO:
 // DRAG AND DROP FUNCTION
+// DEAL THREE FUNCTION WEIRD ARRANGEMNET
+// FIND THE POSSIBLE WINNABLE ARRANGEMENT
+// UNDO
 // drag multiple
 // SCORE FUNCTION
 
@@ -167,9 +174,7 @@ function reducer(state, action) {
         moveCards = newPile.slice(cardIndex);
         newTableau[fromIndex] = remainingPile;
       } else if (from === LOCATIONS.WASTE) newWaste.shift();
-      else if (from === LOCATIONS.FOUNDATION) {
-        newFoundation[fromIndex].pop();
-      }
+      else if (from === LOCATIONS.FOUNDATION) newFoundation[fromIndex].pop();
 
       if (to === LOCATIONS.FOUNDATION) {
         // so if the card we click is what the foundation want then there is should not add the whole deck to foundation
@@ -214,8 +219,25 @@ function Solitaire() {
     }),
   );
 
+  const [activeId, setActiveId] = useState([]);
   const { stock, tableau, foundation, waste, time, gameState, score, drawNum } =
     state;
+  function handleDragStart({ active }) {
+    if (!active) return;
+
+    const { card, cardIndex, location, pileIndex } = active.data.current;
+    if (location === LOCATIONS.TABLEAU) {
+      const currentPile = tableau[pileIndex];
+      const selectedCard = currentPile.slice(cardIndex, currentPile.length);
+
+      setActiveId((ids) => [...ids, ...selectedCard]);
+    }
+
+    if (location === LOCATIONS.FOUNDATION || location === LOCATIONS.WASTE) {
+      setActiveId([card]);
+    }
+  }
+
   function handleDrag({ active, over }) {
     if (active && over) {
       const cardDragged = active.data.current;
@@ -227,7 +249,6 @@ function Solitaire() {
         card,
       } = cardDragged;
       const { index: toIndex, location: toLocation } = droppable;
-
       dispatch(
         createDragAction(
           fromLocation,
@@ -239,10 +260,13 @@ function Solitaire() {
         ),
       );
     }
+    setActiveId([]);
   }
+
   return (
     <DndContext
       autoScroll={false}
+      onDragStart={(e) => handleDragStart(e)}
       onDragEnd={(e) => handleDrag(e)}
       sensors={sensors}
     >
@@ -252,9 +276,13 @@ function Solitaire() {
             <Stock stock={stock} dispatch={dispatch} />
             <Waste cards={waste} dispatch={dispatch} drawNum={drawNum} />
           </div>
+
           <Foundation foundation={foundation} dispatch={dispatch} />
         </div>
 
+        <DragOverlay>
+          {activeId.length > 0 && <Pile cards={activeId} pileIndex={0} />}
+        </DragOverlay>
         <Tableau tableau={tableau} dispatch={dispatch} />
 
         <ScoreAndTime
@@ -265,155 +293,6 @@ function Solitaire() {
         />
       </div>
     </DndContext>
-  );
-}
-
-function Tableau({ tableau, dispatch }) {
-  return (
-    <div className="flex justify-start gap-4">
-      {tableau.map((cardPile, i) => (
-        <Pile dispatch={dispatch} key={i} pileIndex={i} cards={cardPile} />
-      ))}
-    </div>
-  );
-}
-function Pile({ cards, dispatch, pileIndex }) {
-  const cardHeight = 90;
-  const cardWidth = 60;
-  const faceUpOffset = 13;
-  const faceDownOffset = 5;
-
-  const cardOffsets = [];
-  let offset = 0;
-  cards.forEach((card) => {
-    cardOffsets.push(offset);
-    offset += card.faceUp ? faceUpOffset : faceDownOffset;
-  });
-
-  return (
-    <div className="relative min-h-[300px] w-[60px]">
-      {cards.map((card, index) => {
-        const cardComponent = (
-          <Card
-            dispatch={dispatch}
-            pileIndex={pileIndex}
-            cardIndex={index}
-            card={card}
-            location={LOCATIONS.TABLEAU}
-          />
-        );
-
-        return (
-          <div
-            key={card.id}
-            className="absolute left-0"
-            style={{
-              top: `${cardOffsets[index]}px`,
-              zIndex: index,
-            }}
-          >
-            {index === cards.length - 1 ? (
-              <Droppable
-                id={`pile-${pileIndex}`}
-                data={{ index: pileIndex, location: LOCATIONS.TABLEAU }}
-              >
-                {cardComponent}
-              </Droppable>
-            ) : (
-              cardComponent
-            )}
-          </div>
-        );
-      })}
-
-      {cards.length === 0 && (
-        <div
-          className="absolute left-0"
-          style={{
-            top: `0px`,
-            height: `${cardHeight}px`,
-            width: `${cardWidth}px`,
-          }}
-        >
-          <Droppable
-            id={`pile-${pileIndex}`}
-            data={{ index: pileIndex, location: LOCATIONS.TABLEAU }}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Stock({ dispatch, stock }) {
-  return (
-    <div
-      onClick={() => dispatch(createDrawAction())}
-      className="flex h-[90px] w-[60px] items-center justify-center rounded shadow-md"
-    >
-      {stock.length === 0 ? (
-        <img src={cardSlotPaths[0]}></img>
-      ) : (
-        <img src={cardBackPaths[0]}></img>
-      )}
-    </div>
-  );
-}
-
-function Waste({ cards, dispatch, drawNum }) {
-  if (cards.length === 0) return null;
-  const currentDraw = Math.min(cards.length, drawNum);
-  const currentWaste = cards.slice(0, currentDraw).reverse();
-  return (
-    <div className="relative h-[90px] w-[60px]">
-      {currentWaste.map((card, index) => (
-        <div
-          key={card.id}
-          className="absolute"
-          style={{
-            left: `${index * 10}px`,
-            zIndex: index,
-          }}
-        >
-          <Card
-            dispatch={dispatch}
-            card={card}
-            location={LOCATIONS.WASTE}
-            pileIndex={0}
-            cardIndex={index}
-            className="transition-all duration-200"
-            disabled={!(index === currentWaste.length - 1)}
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function Foundation({ foundation, dispatch }) {
-  return (
-    <div className="flex flex-shrink-0 gap-4">
-      {foundation.map((pile, i) => (
-        <div
-          key={i}
-          className="flex h-[90px] w-[60px] flex-shrink-0 items-center justify-center rounded shadow-inner"
-        >
-          <Droppable id={i} data={{ index: i, location: LOCATIONS.FOUNDATION }}>
-            {pile.length === 0 ? (
-              <img src={cardSlotPaths[2]} draggable={false}></img>
-            ) : (
-              <Card
-                dispatch={dispatch}
-                card={pile[pile.length - 1]}
-                location={LOCATIONS.FOUNDATION}
-                pileIndex={i}
-                cardIndex={pile.length - 1}
-              />
-            )}
-          </Droppable>
-        </div>
-      ))}
-    </div>
   );
 }
 

@@ -1,4 +1,4 @@
-import { createDealAction, createResetAction } from './config';
+import { createDealAction, createResetAction, isWinnable } from './config';
 import StopWatch from './StopWatch';
 
 function ScoreAndTime({ score, time, dispatch, gameState }) {
@@ -9,6 +9,10 @@ function ScoreAndTime({ score, time, dispatch, gameState }) {
       <button onClick={() => dispatch(createResetAction())}>Reset</button>
       <button onClick={() => dispatch(createDealAction(1))}>DRAW ONE</button>
       <button onClick={() => dispatch(createDealAction(3))}>DRAW THREE</button>
+      <button>Undo</button>
+      <button onClick={() => console.log(isWinnable(state))}>
+        Check Winnability
+      </button>
     </div>
   );
 }

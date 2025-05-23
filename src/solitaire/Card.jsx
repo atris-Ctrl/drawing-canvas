@@ -1,5 +1,4 @@
 import {
-  ACTIONS,
   cardBackPaths,
   cardPaths,
   createFlipAction,
@@ -35,7 +34,7 @@ function Card({
         onClick={(e) => handleClick(e)}
         className="flex h-[90px] w-[60px] items-center justify-center rounded shadow-md"
       >
-        <img src={cardPath} draggable={false} />
+        <img className="no-drag select-none" src={cardPath} />
       </div>
     </Draggable>
   );
