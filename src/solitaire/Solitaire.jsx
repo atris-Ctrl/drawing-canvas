@@ -12,6 +12,8 @@ import {
   createDragAction,
   createResetAction,
   createDealAction,
+  restoreStock,
+  calculateScore,
 } from './config';
 import {
   DndContext,
@@ -28,8 +30,9 @@ import Foundation from './Foundation';
 import Stock from './Stock';
 import Tableau from './Tableau';
 import Draggable from 'react-draggable';
-import WindowWithMenu from '../minesweeper/WindowWithMenu';
+import WindowWithMenu from '../ui/WindowWithMenu';
 import { FaGithubAlt } from 'react-icons/fa';
+import CardBackSelectionWindow from './CardBackSelectionWindow';
 
 //TODO:
 // FIND THE POSSIBLE WINNABLE ARRANGEMENT
@@ -60,25 +63,20 @@ function reducer(state, action) {
         ...state,
         tableau: newFlipTableau,
         gameState: GAME_STATE.RUNNING,
+        score: state.score + scoreMap.FLIP_CARD,
       };
 
     case ACTIONS.DRAW:
       const { stock: drawStock, waste: drawWaste, drawNum } = state;
       if (drawStock.length === 0 && drawWaste.length > 0) {
         // Recycle waste back to stock (face down)
-
-        const restored = [];
-        for (let i = 0; i < drawWaste.length; i += drawNum) {
-          const group = drawWaste.slice(i, i + drawNum);
-          restored.push(...group.reverse());
-        }
-
-        const resetStock = restored.map((card) => ({
-          ...card,
-          faceUp: false,
-        }));
-
-        return { ...state, stock: resetStock, waste: [] };
+        const resetStock = restoreStock(drawWaste, drawNum);
+        return {
+          ...state,
+          stock: resetStock,
+          waste: [],
+          score: state.score + scoreMap.DRAW_FINISH,
+        };
       }
 
       if (drawStock.length > 0) {
@@ -113,7 +111,7 @@ function reducer(state, action) {
       const dragTableau = [...state.tableau];
       const dragWaste = [...state.waste];
       let dragMoveCards = [card];
-      let totalScore = 0;
+      const totalScore = calculateScore(fromLocation, toLocation);
 
       if (toLocation === LOCATIONS.FOUNDATION) {
         if (!canMoveFoundation(card, dragFoundation[toDestIndex])) return state;
@@ -148,6 +146,7 @@ function reducer(state, action) {
         foundation: dragFoundation,
         tableau: dragTableau,
         waste: dragWaste,
+        score: state.score + totalScore,
       };
     case ACTIONS.MOVE_CARD:
       const {
@@ -169,6 +168,7 @@ function reducer(state, action) {
       if (!validSpot) return state;
       const { location: to, index: toIndex } = validSpot;
 
+      const addScore = calculateScore(from, to);
       const newFoundation = [...currentFoundation];
       const newTableau = [...currentTableau];
       const newWaste = [...currentWaste];
@@ -197,6 +197,7 @@ function reducer(state, action) {
         foundation: newFoundation,
         tableau: newTableau,
         waste: newWaste,
+        score: state.score + addScore,
       };
     case ACTIONS.RESET:
       const resetState = init();
@@ -280,6 +281,7 @@ function Solitaire() {
         <div className="inline-block bg-[#007f00] font-mono text-white">
           <div className="p-3">
             <div className="mb-5 flex justify-between">
+              <CardBackSelectionWindow />
               <div className="flex gap-4">
                 <Stock stock={stock} dispatch={dispatch} />
                 <Waste cards={waste} dispatch={dispatch} drawNum={drawNum} />

@@ -86,10 +86,15 @@ export const scoreMap = {
   DRAW_FINISH: -100,
 };
 
+export function calculateScore(from, to) {
+  const key = `${from}_TO_${to}`;
+  return scoreMap.MOVE_CARD[key] ?? 0;
+}
+
 export const LOCATIONS = {
-  TABLEAU: 'tableau',
-  FOUNDATION: 'foundation',
-  WASTE: 'waste',
+  TABLEAU: 'TABLEAU',
+  FOUNDATION: 'FOUNDATION',
+  WASTE: 'WASTE',
 };
 
 export const GAME_STATE = {
@@ -102,6 +107,21 @@ export const ItemTypes = {
   CARD: 'card',
   LIST: 'list',
 };
+
+export function restoreStock(drawWaste, drawNum) {
+  const restored = [];
+  for (let i = 0; i < drawWaste.length; i += drawNum) {
+    const group = drawWaste.slice(i, i + drawNum);
+    restored.push(...group.reverse());
+  }
+
+  const resetStock = restored.map((card) => ({
+    ...card,
+    faceUp: false,
+  }));
+  return resetStock;
+}
+
 export function isBlack(suit) {
   if (suit === '♥' || suit === '♦') return false;
   return true;
@@ -219,6 +239,7 @@ export function init() {
     score: 0,
     time: 0,
     drawNum: 1,
+    cardBack: 0,
   };
 }
 // export const initialState = {

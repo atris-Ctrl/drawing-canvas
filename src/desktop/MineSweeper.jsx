@@ -10,7 +10,7 @@ import {
   initBoard,
 } from '../minesweeper/config';
 import '../winxp/theme.min.css';
-import WindowWithMenu from '../minesweeper/WindowWithMenu';
+import WindowWithMenu from '../ui/WindowWithMenu';
 import { FaGithubAlt } from 'react-icons/fa';
 
 const borderStyle = `border-b-4 border-l-4 border-r-4 border-t-4 border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white`;
