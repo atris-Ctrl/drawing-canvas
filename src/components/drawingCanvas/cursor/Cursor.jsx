@@ -1,12 +1,12 @@
-import { useEffect, useRef } from "react";
-import "./cursorStyle.css";
-import { useDraw } from "../../contexts/DrawProvider";
+import { useEffect, useRef } from 'react';
+import './cursorStyle.css';
+import { useDraw } from '../DrawProvider';
 
 function Cursor({ canvasRef }) {
   const cursorRef = useRef(null);
 
   const { brushSize, penMode, brushColor } = useDraw();
-  const opacityVal = penMode === "eraser" ? "0" : "0.5";
+  const opacityVal = penMode === 'eraser' ? '0' : '0.5';
   const style = {
     width: `${brushSize}px`,
     height: `${brushSize}px`,
@@ -26,9 +26,9 @@ function Cursor({ canvasRef }) {
         y - cursor.clientHeight / 2
       }px, 0)`;
     }
-    window.addEventListener("mousemove", updatePosition);
+    window.addEventListener('mousemove', updatePosition);
     return () => {
-      window.removeEventListener("mousemove", updatePosition);
+      window.removeEventListener('mousemove', updatePosition);
     };
   }, []);
 

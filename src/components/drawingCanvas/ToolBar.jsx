@@ -1,9 +1,9 @@
-import { useDraw } from "../../contexts/DrawProvider";
-import Button from "../../ui/Button";
-import ColorPicker from "../colors/ColorPicker";
-import GradientDiv from "../../ui/GradientDiv";
-import StickersPlane from "../stickers/StickersPlane";
-import "xp.css/dist/XP.css";
+import { useDraw } from './DrawProvider';
+import Button from '../../ui/Button';
+import ColorPicker from './colors/ColorPicker';
+import GradientDiv from '../../ui/GradientDiv';
+import StickersPlane from './stickers/StickersPlane';
+import 'xp.css/dist/XP.css';
 function ToolBar({ onVisible }) {
   const {
     brushSize,
@@ -16,7 +16,7 @@ function ToolBar({ onVisible }) {
   } = useDraw();
 
   return (
-    <div className="tools-div border-[#7e8acf] p-6 shadow-lg w-80 space-y-6  text-gray-800 text-lg border-4 border-black-300">
+    <div className="tools-div border-black-300 w-80 space-y-6 border-4 border-[#7e8acf] p-6 text-lg text-gray-800 shadow-lg">
       <GradientDiv>
         <label className="block text-2xl font-semibold">
           🖌️ Brush Size: {brushSize}
@@ -52,7 +52,7 @@ function ToolBar({ onVisible }) {
       </GradientDiv>
 
       <GradientDiv>
-        <label className="text-2xl font-semibold mb-2">🎨 Brush Color</label>
+        <label className="mb-2 text-2xl font-semibold">🎨 Brush Color</label>
         <div className="bg-[#d8dff8] p-3">
           <ColorPicker />
         </div>
@@ -60,26 +60,26 @@ function ToolBar({ onVisible }) {
 
       <div className="flex justify-between">
         <Button
-          onClick={() => setPenMode("eraser")}
+          onClick={() => setPenMode('eraser')}
           title="Eraser"
           styleClass={
-            penMode === "eraser" ? "bg-white scale-115 shadow-md" : ""
+            penMode === 'eraser' ? 'bg-white scale-115 shadow-md' : ''
           }
         >
           <i className="fa-solid fa-eraser text-xl" />
         </Button>
         <Button
-          onClick={() => setPenMode("pen")}
+          onClick={() => setPenMode('pen')}
           title="Pen"
-          styleClass={penMode === "pen" ? "bg-white scale-115 shadow-md" : ""}
+          styleClass={penMode === 'pen' ? 'bg-white scale-115 shadow-md' : ''}
         >
           <i className="fa-solid fa-pencil text-xl" />
         </Button>
         <Button
-          onClick={() => setPenMode("sticker")}
+          onClick={() => setPenMode('sticker')}
           title="Sticker"
           styleClass={
-            penMode === "sticker" ? "bg-white scale-115 shadow-md" : ""
+            penMode === 'sticker' ? 'bg-white scale-115 shadow-md' : ''
           }
         >
           <i className="fa-regular fa-note-sticky text-xl" />

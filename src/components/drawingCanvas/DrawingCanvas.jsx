@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { useDraw } from "../../contexts/DrawProvider";
-import Cursor from "../Cursor/Cursor";
+import { useEffect, useRef, useState } from 'react';
+import { useDraw } from './DrawProvider';
+import Cursor from './cursor/Cursor';
 
 function getMousePos(canvas, e) {
   const rect = canvas.getBoundingClientRect();
@@ -45,7 +45,7 @@ function DrawingCanvas({ dimensions, imgSrc }) {
   useEffect(() => {
     if (clearCanvas) {
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, width, height);
       setClearCanvas(false);
     }
@@ -55,7 +55,7 @@ function DrawingCanvas({ dimensions, imgSrc }) {
     const canvas = canvasRef.current;
 
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const draw = (e) => {
@@ -75,11 +75,11 @@ function DrawingCanvas({ dimensions, imgSrc }) {
     const startDrawing = (e) => {
       const pos = getMousePos(canvas, e);
       const penMode = penModeRef.current;
-      ctx.globalCompositeOperation = "source-over";
+      ctx.globalCompositeOperation = 'source-over';
 
-      if (penMode == "sticker") {
+      if (penMode == 'sticker') {
         const img = new Image();
-        img.src = "stickers/test.png";
+        img.src = 'stickers/test.png';
         img.onload = function () {
           const width = this.width;
           const height = this.height;
@@ -90,15 +90,15 @@ function DrawingCanvas({ dimensions, imgSrc }) {
       }
       lastXYRef.current = { x: pos.x, y: pos.y };
       isDrawingRef.current = true;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
       ctx.lineWidth = brushSizeRef.current;
       ctx.globalAlpha = brushOpacityRef.current / 100;
 
-      if (penMode == "pen") {
+      if (penMode == 'pen') {
         ctx.strokeStyle = brushColorRef.current;
-      } else if (penMode == "eraser") {
-        ctx.globalCompositeOperation = "destination-out";
+      } else if (penMode == 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
       }
       ctx.beginPath();
       ctx.moveTo(pos.x, pos.y);
@@ -111,16 +111,16 @@ function DrawingCanvas({ dimensions, imgSrc }) {
       ctx.closePath();
     };
 
-    canvas.addEventListener("mousedown", startDrawing);
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", endDrawing);
-    canvas.addEventListener("mouseleave", endDrawing);
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', endDrawing);
+    canvas.addEventListener('mouseleave', endDrawing);
 
     return () => {
-      canvas.removeEventListener("mousedown", startDrawing);
-      canvas.removeEventListener("mousemove", draw);
-      canvas.removeEventListener("mouseup", endDrawing);
-      canvas.removeEventListener("mouseleave", endDrawing);
+      canvas.removeEventListener('mousedown', startDrawing);
+      canvas.removeEventListener('mousemove', draw);
+      canvas.removeEventListener('mouseup', endDrawing);
+      canvas.removeEventListener('mouseleave', endDrawing);
     };
   }, [width, height]);
 
@@ -131,7 +131,7 @@ function DrawingCanvas({ dimensions, imgSrc }) {
         ref={canvasRef}
         width={width}
         height={height}
-        style={{ display: "block", cursor: "none" }}
+        style={{ display: 'block', cursor: 'none' }}
       />
     </>
   );

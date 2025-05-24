@@ -1,6 +1,6 @@
-import { useDraw } from "../../contexts/DrawProvider";
-import Color from "./Color";
-import "./colorpicker.css";
+import { useDraw } from '../DrawProvider';
+import Color from './Color';
+import './colorpicker.css';
 function ColorPicker() {
   const { recentColors, handleAddColor, brushColor, setBrushColor } = useDraw();
   function handleColor(e) {
@@ -22,7 +22,7 @@ function ColorPicker() {
           onChange={handleColor}
         />
       </div>
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex flex-wrap gap-2">
         {recentColors.map((color) => (
           <Color key={color} colorCode={color} onClick={changeColor}></Color>
         ))}

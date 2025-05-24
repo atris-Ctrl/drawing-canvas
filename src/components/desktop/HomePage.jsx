@@ -1,9 +1,9 @@
 import { useNavigate } from 'react-router';
-import Chicken from '../components/chicken/Chicken';
-import Footer from '../ui/Footer';
-import DesktopIcon from '../components/desktop/DesktopIcon';
-import CommandPrompt from '../components/desktop/CommandPrompt';
-import MineSweeper from '../minesweeper/MineSweeper';
+import Chicken from '../chicken/Chicken';
+import Footer from '../../ui/Footer';
+import DesktopIcon from './DesktopIcon';
+import CommandPrompt from './CommandPrompt';
+import MineSweeper from '../../minesweeper/MineSweeper';
 
 function HomePage() {
   return (

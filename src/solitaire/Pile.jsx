@@ -15,7 +15,6 @@ const Pile = function Pile({ cards, dispatch, pileIndex, activeId = [] }) {
     offset += card.faceUp ? faceUpOffset : faceDownOffset;
   });
 
-  console.log(activeId);
   return (
     <div className="relative min-h-[300px] w-[60px]">
       {cards.map((card, index) => {

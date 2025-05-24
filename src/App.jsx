@@ -1,10 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router';
-import DrawApp from './pages/DrawPage';
-
-import HomePage from './pages/HomePage';
-
-import MineSweeper from './minesweeper/MineSweeper';
-import { BiSolidCircleThreeQuarter } from 'react-icons/bi';
+import DrawApp from './components/drawingCanvas/DrawPage';
+import HomePage from './components/desktop/HomePage';
 import StartPlane from './components/desktop/StartPlane';
 import Solitaire from './solitaire/Solitaire';
 
@@ -19,10 +15,6 @@ function App() {
           <Route path="game" element={<Solitaire />}></Route>
 
           <Route path="mine" element={<StartPlane />}></Route>
-          {/* <Route element={<AuthLayout />}>
-              <Route path="login" element={<LoginPage />} />
-              <Route path="register" element={<RegisterPage />} />
-            </Route> */}
         </Routes>
       </BrowserRouter>
     </div>

@@ -1,8 +1,8 @@
-import { useDraw } from "../../contexts/DrawProvider";
+import { useDraw } from '../DrawProvider';
 
 function Stickers() {
   return (
-    <div className="grid grid-cols-2 gap-3 p-4 border rounded-md">
+    <div className="grid grid-cols-2 gap-3 rounded-md border p-4">
       <Sticker></Sticker>
       <Sticker></Sticker>
       <Sticker></Sticker>
@@ -15,7 +15,7 @@ function Stickers() {
 function Sticker({ imgSrc }) {
   const { setSticker } = useDraw();
   function handleClick() {
-    setSticker("hello");
+    setSticker('hello');
   }
   return (
     <div onClick={handleClick} className="flex flex-col text-center">
