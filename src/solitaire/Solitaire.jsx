@@ -10,6 +10,8 @@ import {
   canMovePile,
   scoreMap,
   createDragAction,
+  createResetAction,
+  createDealAction,
 } from './config';
 import {
   DndContext,
@@ -27,13 +29,13 @@ import Stock from './Stock';
 import Tableau from './Tableau';
 import Window from '../desktop/Window';
 import Draggable from 'react-draggable';
+import WindowWithMenu from '../minesweeper/WindowWithMenu';
+import { FaGithubAlt } from 'react-icons/fa';
 
 //TODO:
-// DRAG AND DROP FUNCTION
 // DEAL THREE FUNCTION WEIRD ARRANGEMNET
 // FIND THE POSSIBLE WINNABLE ARRANGEMENT
 // UNDO
-// drag multiple
 // SCORE FUNCTION
 
 function reducer(state, action) {
@@ -205,6 +207,44 @@ function reducer(state, action) {
   }
 }
 
+const menuItems = (dispatch) => {
+  return [
+    {
+      label: 'Game',
+      underline: 'G',
+      items: [
+        {
+          label: 'Reset',
+          action: () => dispatch(createResetAction()),
+        },
+        {
+          label: 'Draw 1',
+          action: () => dispatch(createDealAction(1)),
+        },
+        {
+          label: 'Draw 3',
+          action: () => dispatch(createDealAction(3)),
+        },
+      ],
+    },
+    {
+      label: 'Help',
+      underline: 'H',
+      items: [
+        { label: 'Deck', action: () => console.log('hello') },
+        {
+          label: (
+            <span className="flex items-center gap-1">
+              Github <FaGithubAlt />
+            </span>
+          ),
+          href: 'https://github.com/atris-Ctrl',
+        },
+      ],
+    },
+  ];
+};
+
 function Solitaire() {
   const [state, dispatch] = useReducer(reducer, undefined, init);
   const sensors = useSensors(
@@ -259,36 +299,41 @@ function Solitaire() {
   }
 
   return (
-    <Window title="Solitaire">
+    <WindowWithMenu menuItems={menuItems(dispatch)} title="Solitaire">
       <DndContext
         autoScroll={false}
         onDragStart={(e) => handleDragStart(e)}
         onDragEnd={(e) => handleDrag(e)}
         sensors={sensors}
       >
-        <div>
+        <div className="inline-block bg-[#007f00] font-mono text-white">
+          <div className="p-3">
+            <div className="mb-5 flex justify-between">
+              <div className="flex gap-4">
+                <Stock stock={stock} dispatch={dispatch} />
+                <Waste cards={waste} dispatch={dispatch} drawNum={drawNum} />
+              </div>
+              <Foundation foundation={foundation} dispatch={dispatch} />
+            </div>
+
+            <DragOverlay>
+              {activeId.length > 0 && <Pile cards={activeId} pileIndex={0} />}
+            </DragOverlay>
+            <Tableau
+              activeId={activeId}
+              tableau={tableau}
+              dispatch={dispatch}
+            />
+          </div>
+
           <ScoreAndTime
             score={score}
             dispatch={dispatch}
             gameState={gameState}
           />
         </div>
-        <div className="inline-block bg-[#007f00] p-6 font-mono text-white">
-          <div className="mb-8 flex justify-between">
-            <div className="flex gap-4">
-              <Stock stock={stock} dispatch={dispatch} />
-              <Waste cards={waste} dispatch={dispatch} drawNum={drawNum} />
-            </div>
-            <Foundation foundation={foundation} dispatch={dispatch} />
-          </div>
-
-          <DragOverlay>
-            {activeId.length > 0 && <Pile cards={activeId} pileIndex={0} />}
-          </DragOverlay>
-          <Tableau activeId={activeId} tableau={tableau} dispatch={dispatch} />
-        </div>
       </DndContext>
-    </Window>
+    </WindowWithMenu>
   );
 }
 

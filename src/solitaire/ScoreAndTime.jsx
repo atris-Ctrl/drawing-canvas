@@ -1,19 +1,25 @@
-import { createDealAction, createResetAction, isWinnable } from './config';
+import { isWinnable } from './config';
 import StopWatch from './StopWatch';
-
 function ScoreAndTime({ score, dispatch, gameState }) {
   return (
-    <div className="mt-8 flex">
-      <div>Score: {score} &nbsp;&nbsp;</div>
-      <StopWatch gameState={gameState} />
-
-      <button onClick={() => dispatch(createResetAction())}>Reset</button>
-      <button onClick={() => dispatch(createDealAction(1))}>DRAW ONE</button>
-      <button onClick={() => dispatch(createDealAction(3))}>DRAW THREE</button>
-      <button>Undo</button>
-      <button onClick={() => console.log(isWinnable(state))}>
-        Check Winnability
-      </button>
+    <div className="flex w-full items-center justify-between bg-white px-2 py-1 text-black">
+      <div className="flex-1"></div>
+      <div className="flex items-center space-x-4">
+        <div className="text-right">Score: {score}</div>
+        <StopWatch gameState={gameState} />
+        <button
+          onClick={() => dispatch({ type: 'UNDO' })}
+          className="border bg-gray-200 px-2 py-1 hover:bg-gray-300"
+        >
+          Undo
+        </button>
+        <button
+          onClick={() => console.log(isWinnable(gameState))}
+          className="border bg-gray-200 px-2 py-1 hover:bg-gray-300"
+        >
+          Check Winnability
+        </button>
+      </div>
     </div>
   );
 }

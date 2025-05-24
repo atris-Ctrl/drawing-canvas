@@ -8,9 +8,10 @@ import {
   CellStates,
   GAME_STATE,
   initBoard,
-} from './config';
+} from '../minesweeper/config';
 import '../winxp/theme.min.css';
-import WindowWithMenu from './WindowWithMenu';
+import WindowWithMenu from '../minesweeper/WindowWithMenu';
+import { FaGithubAlt } from 'react-icons/fa';
 
 const borderStyle = `border-b-4 border-l-4 border-r-4 border-t-4 border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white`;
 
@@ -164,14 +165,51 @@ function reducer(state, action) {
 function MineSweeper() {
   const [state, dispatch] = useReducer(reducer, 'beginner', initializeState);
   const [onPress, setOnPress] = useState(false);
-  const { level, flagged, gameState, time, board, revealed, clickedBomb } =
-    state;
+  const { level, flagged, gameState, time } = state;
   const { N_ROW, N_BOMBS } = settings[level];
   const fixedArrayRow = Array.from(Array(N_ROW).keys());
   const remainingBombs = N_BOMBS - flagged.size;
-
+  const menuItems = [
+    {
+      label: 'Game',
+      underline: 'G',
+      items: [
+        {
+          label: 'Beginner',
+          action: () => dispatch({ type: 'CHANGE_LEVEL', payload: 'beginner' }),
+        },
+        {
+          label: 'Intermediate',
+          action: () =>
+            dispatch({ type: 'CHANGE_LEVEL', payload: 'intermediate' }),
+        },
+        {
+          label: 'Expert',
+          action: () => dispatch({ type: 'CHANGE_LEVEL', payload: 'expert' }),
+        },
+      ],
+    },
+    {
+      label: 'Help',
+      underline: 'H',
+      items: [
+        {
+          label: (
+            <span className="flex items-center gap-1">
+              Github <FaGithubAlt />
+            </span>
+          ),
+          href: 'https://github.com/atris-Ctrl',
+        },
+      ],
+    },
+  ];
   return (
-    <WindowWithMenu dispatch={dispatch}>
+    <WindowWithMenu
+      menuItems={menuItems}
+      title="Mine Sweeper"
+      icon="assets/minesweeper/mine.png"
+    >
       <div
         className={`m-0 inline-flex flex-col gap-2 bg-[#c0c0c0] ${borderStyle}`}
       >

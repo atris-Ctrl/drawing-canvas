@@ -3,7 +3,7 @@ import Chicken from '../components/chicken/Chicken';
 import Footer from '../ui/Footer';
 import DesktopIcon from './DesktopIcon';
 import CommandPrompt from './CommandPrompt';
-import MineSweeper from '../minesweeper/MineSweeper';
+import MineSweeper from './MineSweeper';
 
 function HomePage() {
   return (
