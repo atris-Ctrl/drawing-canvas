@@ -5,6 +5,7 @@ function ScoreAndTime({ score, dispatch, gameState }) {
   return (
     <div className="mt-8 flex">
       <div>Score: {score} &nbsp;&nbsp;</div>
+      <StopWatch gameState={gameState} />
 
       <button onClick={() => dispatch(createResetAction())}>Reset</button>
       <button onClick={() => dispatch(createDealAction(1))}>DRAW ONE</button>

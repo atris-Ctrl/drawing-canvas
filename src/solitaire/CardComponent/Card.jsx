@@ -6,6 +6,7 @@ import {
   createMoveAction,
 } from '../config';
 import Draggable from '../Draggable';
+import { useCallback } from 'react';
 
 function Card({
   card,
@@ -16,7 +17,7 @@ function Card({
   hide = false,
   disabledClick = false,
 }) {
-  const { faceUp } = card;
+  const { faceUp, id } = card;
 
   function handleClick(e) {
     e.preventDefault();
@@ -29,15 +30,13 @@ function Card({
   }
 
   const data = { location, pileIndex, cardIndex, card };
-  const cardPath = faceUp ? cardPaths[card.id] : cardBackPaths[0];
+  const cardPath = faceUp ? cardPaths[id] : cardBackPaths[0];
+  const isDraggableDisabled = disabledClick || !faceUp;
+
   return (
-    <Draggable
-      id={card.id}
-      data={data}
-      disabled={disabledClick || !card.faceUp}
-    >
+    <Draggable id={card.id} data={data} disabled={isDraggableDisabled}>
       <div
-        onClick={(e) => handleClick(e)}
+        onClick={handleClick}
         className="flex h-[90px] w-[60px] items-center justify-center"
       >
         {!hide && <CardImage cardPath={cardPath} />}

@@ -7,11 +7,8 @@ import {
   findValidSpot,
   checkWin,
   canMoveFoundation,
-  cardSlotPaths,
-  cardBackPaths,
   canMovePile,
   scoreMap,
-  createDrawAction,
   createDragAction,
 } from './config';
 import {
@@ -22,15 +19,12 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import Droppable from './Droppable';
-import Card from './CardComponent/Card';
 import ScoreAndTime from './ScoreAndTime';
 import Pile from './Pile';
 import Waste from './Waste';
 import Foundation from './Foundation';
 import Stock from './Stock';
 import Tableau from './Tableau';
-import StopWatch from './StopWatch';
 
 //TODO:
 // DRAG AND DROP FUNCTION
@@ -139,7 +133,7 @@ function reducer(state, action) {
       const currentGameState = isWinning ? GAME_STATE.WIN : state.gameState;
       return {
         ...state,
-        gameState: currentGameState,
+        // gameState: currentGameState,
         foundation: dragFoundation,
         tableau: dragTableau,
         waste: dragWaste,
@@ -215,7 +209,7 @@ function Solitaire() {
     useSensor(MouseSensor),
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 5,
       },
     }),
   );
@@ -229,7 +223,6 @@ function Solitaire() {
     if (location === LOCATIONS.TABLEAU) {
       const currentPile = tableau[pileIndex];
       const selectedCard = currentPile.slice(cardIndex, currentPile.length);
-
       setActiveId((ids) => [...ids, ...selectedCard]);
     }
 
@@ -260,7 +253,7 @@ function Solitaire() {
         ),
       );
     }
-    setActiveId([]);
+    setTimeout(() => setActiveId([]), 200);
   }
 
   return (
@@ -270,7 +263,10 @@ function Solitaire() {
       onDragEnd={(e) => handleDrag(e)}
       sensors={sensors}
     >
-      <div className="inline-block w-full bg-green-800 p-6 font-mono text-white">
+      <div>
+        <ScoreAndTime score={score} dispatch={dispatch} gameState={gameState} />
+      </div>
+      <div className="inline-block bg-[#007f00] p-6 font-mono text-white">
         <div className="mb-8 flex justify-between">
           <div className="flex gap-4">
             <Stock stock={stock} dispatch={dispatch} />
@@ -284,8 +280,6 @@ function Solitaire() {
           {activeId.length > 0 && <Pile cards={activeId} pileIndex={0} />}
         </DragOverlay>
         <Tableau activeId={activeId} tableau={tableau} dispatch={dispatch} />
-        <StopWatch time={time} dispatch={dispatch} gameState={gameState} />
-        <ScoreAndTime score={score} dispatch={dispatch} gameState={gameState} />
       </div>
     </DndContext>
   );

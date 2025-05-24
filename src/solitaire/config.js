@@ -215,22 +215,22 @@ export function init() {
     tableau,
     foundation: [[], [], [], []],
     waste: [],
-    gameState: GAME_STATE.READY,
+    gameState: GAME_STATE.IDLE,
     score: 0,
     time: 0,
     drawNum: 1,
   };
 }
-export const initialState = {
-  stock: [],
-  waste: [],
-  foundation: [[], [], [], []],
-  tableau: [[], [], [], [], [], [], []],
-  score: 0,
-  time: 0,
-  drawNum: 1,
-  gameState: GAME_STATE.IDLE,
-};
+// export const initialState = {
+//   stock: [],
+//   waste: [],
+//   foundation: [[], [], [], []],
+//   tableau: [[], [], [], [], [], [], []],
+//   score: 0,
+//   time: 0,
+//   drawNum: 1,
+//   gameState: GAME_STATE.RUNNING,
+// };
 
 export function getValidMoves(gameState) {
   // for all top cards in tableau and foundation and waste and stock

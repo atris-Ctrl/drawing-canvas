@@ -22,7 +22,7 @@ function Draggable({ children, id, data, disabled }) {
   };
 
   return (
-    <div {...attributes} {...listeners} ref={setNodeRef} style={style}>
+    <div ref={setNodeRef} {...attributes} {...listeners} style={style}>
       {children}
     </div>
   );
