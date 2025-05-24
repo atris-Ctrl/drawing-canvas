@@ -1,5 +1,3 @@
-import "xp.css/dist/XP.css";
-
 function Button({ children, onClick, styleClass }) {
   function handleClick(e) {
     e.preventDefault();

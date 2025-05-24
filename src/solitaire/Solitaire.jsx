@@ -25,7 +25,7 @@ import Waste from './Waste';
 import Foundation from './Foundation';
 import Stock from './Stock';
 import Tableau from './Tableau';
-import Window from '../components/desktop/Window';
+import Window from '../desktop/Window';
 import Draggable from 'react-draggable';
 
 //TODO:

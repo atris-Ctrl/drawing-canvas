@@ -1,4 +1,4 @@
-import XPTab from '../components/desktop/XPTab';
+import XPTab from '../desktop/XPTab';
 import Timer from './Timer';
 
 function Footer() {

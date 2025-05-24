@@ -1,11 +1,13 @@
-import { useState } from "react";
-import Draggable from "react-draggable";
+import { useState } from 'react';
+import Draggable from 'react-draggable';
+import '../winxp/skins/default.css';
+import '../winxp/theme.css';
 
 function CommandPrompt() {
-  const [command, setCommand] = useState("");
+  const [command, setCommand] = useState('');
   return (
     <Draggable>
-      <div className="window w-fit h-fit">
+      <div className="window h-fit w-fit">
         <div className="title-bar">
           <div className="title-bar-text">Command Prompt</div>
           <div className="title-bar-controls">

@@ -1,4 +1,7 @@
 import Draggable from 'react-draggable';
+import '../winxp/skins/default.css';
+import '../winxp/theme.css';
+
 function Window({
   title = 'Window',
   icon,

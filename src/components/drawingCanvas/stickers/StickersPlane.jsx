@@ -1,6 +1,5 @@
-import Stickers from "./Stickers";
-import "xp.css/dist/XP.css";
-
+import Stickers from './Stickers';
+import '../../../winxp/theme.css';
 function StickersPlane() {
   return (
     <div className="window w-50 h-50">
