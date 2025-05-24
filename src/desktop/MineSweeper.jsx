@@ -20,15 +20,6 @@ const sunkenBorderStyle2 =
 
 const sunkenBorderStyle4 = `border-b-4 border-l-4 border-r-4 border-t-4 border-b-white border-l-[#7a7a7a] border-r-white border-t-[#7a7a7a]`;
 
-// * State Properties:
-// * - `board` {Array<Array<Object>>} - The Minesweeper board containing cell data.
-// * - `revealed` {Set<string>} - A set of keys representing revealed cells.
-// * - `flagged` {Set<string>} - A set of keys representing flagged cells.
-// * - `gameState` {string} - The current state of the game (`RUNNING`, `WIN`, `LOST`, etc.).
-// * - `level` {string} - The current difficulty level.
-// * - `mineCoords` {Array<string>} - The coordinates of all mines on the board.
-// * - `time` {number} - The elapsed time in seconds.
-// *
 const initialState = {
   level: 'beginner',
   board: [],

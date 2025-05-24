@@ -37,6 +37,7 @@ export const ACTIONS = {
   DRAG_CARD: 'drag_card',
   TICK: 'tick',
   RESET: 'reset',
+  UNDO: 'undo',
   DEAL_NUM: 'deal_num',
 };
 
@@ -169,7 +170,6 @@ export function checkWin(foundation) {
     (acc, pile) => acc + pile.length,
     0,
   );
-
   return numCards === cardsInFoundation;
 }
 

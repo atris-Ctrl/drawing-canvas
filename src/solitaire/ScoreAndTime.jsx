@@ -2,7 +2,7 @@ import { isWinnable } from './config';
 import StopWatch from './StopWatch';
 function ScoreAndTime({ score, dispatch, gameState }) {
   return (
-    <div className="flex w-full items-center justify-between bg-white px-2 py-1 text-black">
+    <div className="flex w-full items-center justify-between bg-white px-2 py-1 font-extrabold text-black">
       <div className="flex-1"></div>
       <div className="flex items-center space-x-4">
         <div className="text-right">Score: {score}</div>

@@ -27,13 +27,11 @@ import Waste from './Waste';
 import Foundation from './Foundation';
 import Stock from './Stock';
 import Tableau from './Tableau';
-import Window from '../desktop/Window';
 import Draggable from 'react-draggable';
 import WindowWithMenu from '../minesweeper/WindowWithMenu';
 import { FaGithubAlt } from 'react-icons/fa';
 
 //TODO:
-// DEAL THREE FUNCTION WEIRD ARRANGEMNET
 // FIND THE POSSIBLE WINNABLE ARRANGEMENT
 // UNDO
 // SCORE FUNCTION
@@ -68,16 +66,25 @@ function reducer(state, action) {
       const { stock: drawStock, waste: drawWaste, drawNum } = state;
       if (drawStock.length === 0 && drawWaste.length > 0) {
         // Recycle waste back to stock (face down)
-        const resetStock = drawWaste.map((card) => ({
+
+        const restored = [];
+        for (let i = 0; i < drawWaste.length; i += drawNum) {
+          const group = drawWaste.slice(i, i + drawNum);
+          restored.push(...group.reverse());
+        }
+
+        const resetStock = restored.map((card) => ({
           ...card,
           faceUp: false,
         }));
+
         return { ...state, stock: resetStock, waste: [] };
       }
 
       if (drawStock.length > 0) {
         const numToDraw = Math.min(drawNum, drawStock.length);
         const newStock = [...drawStock];
+
         const drawnCards = newStock
           .splice(-numToDraw)
           .map((card) => ({ ...card, faceUp: true }))
@@ -137,7 +144,7 @@ function reducer(state, action) {
       const currentGameState = isWinning ? GAME_STATE.WIN : state.gameState;
       return {
         ...state,
-        // gameState: currentGameState,
+        gameState: currentGameState,
         foundation: dragFoundation,
         tableau: dragTableau,
         waste: dragWaste,
@@ -195,6 +202,8 @@ function reducer(state, action) {
       const resetState = init();
       return resetState;
 
+    case ACTIONS.UNDO:
+      return state;
     case ACTIONS.DEAL_NUM:
       const deal = action.payload;
       const reset = init();
@@ -206,44 +215,6 @@ function reducer(state, action) {
       throw new Error('Unknown action type');
   }
 }
-
-const menuItems = (dispatch) => {
-  return [
-    {
-      label: 'Game',
-      underline: 'G',
-      items: [
-        {
-          label: 'Reset',
-          action: () => dispatch(createResetAction()),
-        },
-        {
-          label: 'Draw 1',
-          action: () => dispatch(createDealAction(1)),
-        },
-        {
-          label: 'Draw 3',
-          action: () => dispatch(createDealAction(3)),
-        },
-      ],
-    },
-    {
-      label: 'Help',
-      underline: 'H',
-      items: [
-        { label: 'Deck', action: () => console.log('hello') },
-        {
-          label: (
-            <span className="flex items-center gap-1">
-              Github <FaGithubAlt />
-            </span>
-          ),
-          href: 'https://github.com/atris-Ctrl',
-        },
-      ],
-    },
-  ];
-};
 
 function Solitaire() {
   const [state, dispatch] = useReducer(reducer, undefined, init);
@@ -336,5 +307,43 @@ function Solitaire() {
     </WindowWithMenu>
   );
 }
+
+const menuItems = (dispatch) => {
+  return [
+    {
+      label: 'Game',
+      underline: 'G',
+      items: [
+        {
+          label: 'Reset',
+          action: () => dispatch(createResetAction()),
+        },
+        {
+          label: 'Draw 1',
+          action: () => dispatch(createDealAction(1)),
+        },
+        {
+          label: 'Draw 3',
+          action: () => dispatch(createDealAction(3)),
+        },
+      ],
+    },
+    {
+      label: 'Help',
+      underline: 'H',
+      items: [
+        { label: 'Deck', action: () => console.log('hello') },
+        {
+          label: (
+            <span className="flex items-center gap-1">
+              Github <FaGithubAlt />
+            </span>
+          ),
+          href: 'https://github.com/atris-Ctrl',
+        },
+      ],
+    },
+  ];
+};
 
 export default Solitaire;
