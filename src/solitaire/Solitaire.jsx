@@ -25,6 +25,7 @@ import Waste from './Waste';
 import Foundation from './Foundation';
 import Stock from './Stock';
 import Tableau from './Tableau';
+import Window from '../components/desktop/Window';
 
 //TODO:
 // DRAG AND DROP FUNCTION
@@ -257,31 +258,36 @@ function Solitaire() {
   }
 
   return (
-    <DndContext
-      autoScroll={false}
-      onDragStart={(e) => handleDragStart(e)}
-      onDragEnd={(e) => handleDrag(e)}
-      sensors={sensors}
-    >
-      <div>
-        <ScoreAndTime score={score} dispatch={dispatch} gameState={gameState} />
-      </div>
-      <div className="inline-block bg-[#007f00] p-6 font-mono text-white">
-        <div className="mb-8 flex justify-between">
-          <div className="flex gap-4">
-            <Stock stock={stock} dispatch={dispatch} />
-            <Waste cards={waste} dispatch={dispatch} drawNum={drawNum} />
+    <Window title="Solitaire">
+      <DndContext
+        autoScroll={false}
+        onDragStart={(e) => handleDragStart(e)}
+        onDragEnd={(e) => handleDrag(e)}
+        sensors={sensors}
+      >
+        <div>
+          <ScoreAndTime
+            score={score}
+            dispatch={dispatch}
+            gameState={gameState}
+          />
+        </div>
+        <div className="inline-block bg-[#007f00] p-6 font-mono text-white">
+          <div className="mb-8 flex justify-between">
+            <div className="flex gap-4">
+              <Stock stock={stock} dispatch={dispatch} />
+              <Waste cards={waste} dispatch={dispatch} drawNum={drawNum} />
+            </div>
+            <Foundation foundation={foundation} dispatch={dispatch} />
           </div>
 
-          <Foundation foundation={foundation} dispatch={dispatch} />
+          <DragOverlay>
+            {activeId.length > 0 && <Pile cards={activeId} pileIndex={0} />}
+          </DragOverlay>
+          <Tableau activeId={activeId} tableau={tableau} dispatch={dispatch} />
         </div>
-
-        <DragOverlay>
-          {activeId.length > 0 && <Pile cards={activeId} pileIndex={0} />}
-        </DragOverlay>
-        <Tableau activeId={activeId} tableau={tableau} dispatch={dispatch} />
-      </div>
-    </DndContext>
+      </DndContext>
+    </Window>
   );
 }
 
