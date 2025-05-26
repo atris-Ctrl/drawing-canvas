@@ -1,4 +1,10 @@
-function Window({ title = 'Window', icon, menuItems = [], children }) {
+function Window({
+  title = 'Window',
+  icon,
+  menuItems = [],
+  children,
+  closeButton,
+}) {
   return (
     <div className="window active inline-block w-fit">
       <div className="title-bar w-full">
@@ -7,7 +13,7 @@ function Window({ title = 'Window', icon, menuItems = [], children }) {
           {title}
         </div>
         <div className="title-bar-buttons flex shrink-0">
-          <button data-close="" />
+          <button onClick={closeButton} data-close="" />
         </div>
       </div>
 

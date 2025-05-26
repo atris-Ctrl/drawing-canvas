@@ -29,12 +29,16 @@ import Waste from './Waste';
 import Foundation from './Foundation';
 import Stock from './Stock';
 import Tableau from './Tableau';
-import Draggable from 'react-draggable';
+import Draggable from './Draggable';
+// import Draggable from 'react-draggable';
 import Modal from '../ui/Modal';
 import { FaGithubAlt } from 'react-icons/fa';
 import CardBackSelectionWindow from './CardSelection';
-import WindowTest from '../ui/Window';
-import Window from '../ui/Window';
+import ClosableWindow from '../ui/ClosableWindow';
+import {
+  restrictToFirstScrollableAncestor,
+  restrictToParentElement,
+} from '@dnd-kit/modifiers';
 
 //TODO:
 // FIND THE POSSIBLE WINNABLE ARRANGEMENT
@@ -286,14 +290,15 @@ function Solitaire() {
   return (
     <>
       <Modal>
-        <Window menuItems={menuItems(dispatch)} title="Solitaire">
+        <ClosableWindow menuItems={menuItems(dispatch)} title="Solitaire">
           <DndContext
             autoScroll={false}
             onDragStart={(e) => handleDragStart(e)}
             onDragEnd={(e) => handleDrag(e)}
             sensors={sensors}
+            // modifiers={[restrictToParentElement]}
           >
-            <div className="inline-block bg-[#007f00] font-mono text-white">
+            <div className="relative inline-block bg-[#007f00] font-mono text-white">
               <div className="p-3">
                 <div className="mb-5 flex justify-between">
                   <Modal.Open opens="settings">
@@ -342,7 +347,7 @@ function Solitaire() {
               />
             </div>
           </DndContext>
-        </Window>
+        </ClosableWindow>
       </Modal>
     </>
   );
