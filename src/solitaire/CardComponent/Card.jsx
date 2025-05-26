@@ -6,10 +6,10 @@ import {
   createMoveAction,
 } from '../config';
 import Draggable from '../Draggable';
-import { useCallback } from 'react';
 
 function Card({
   card,
+  cardBack,
   dispatch,
   location,
   pileIndex,
@@ -30,7 +30,7 @@ function Card({
   }
 
   const data = { location, pileIndex, cardIndex, card };
-  const cardPath = faceUp ? cardPaths[id] : cardBackPaths[0];
+  const cardPath = faceUp ? cardPaths[id] : cardBackPaths[cardBack];
   const isDraggableDisabled = disabledClick || !faceUp;
 
   return (

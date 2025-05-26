@@ -1,19 +1,48 @@
+import { cloneElement, createContext, useContext, useState } from 'react';
 import Draggable from 'react-draggable';
+import useOutsideClick from '../useOutsideClick';
 
-function WindowWithMenu({ title = 'Window', icon, menuItems = [], children }) {
+const ModalContext = createContext();
+
+function Open({ children, opens: openWindowName }) {
+  const { open } = useContext(ModalContext);
+  return cloneElement(children, { onClick: () => open(openWindowName) });
+}
+
+function Modal({ children }) {
+  const [openName, setOpenName] = useState('');
+  const close = () => setOpenName('');
+  const open = setOpenName;
   return (
-    <div className="window active inline-block w-fit">
+    <ModalContext.Provider value={{ open, close, openName }}>
+      {children}
+    </ModalContext.Provider>
+  );
+}
+
+function WindowWithMenu({
+  name,
+  title = 'Window',
+  icon,
+  menuItems = [],
+  children,
+}) {
+  const { openName, close } = useContext(ModalContext);
+  const ref = useOutsideClick(close);
+  if (openName !== name) return;
+  return (
+    <div ref={ref} className="window active inline-block w-fit">
       <div className="title-bar w-full">
         <div className="title-bar-text flex w-fit items-center">
           {icon && <img src={icon} className="mr-1 h-auto w-4" />}
           {title}
         </div>
         <div className="title-bar-buttons flex shrink-0">
-          <button data-close="" />
+          <button data-close="" onClick={close} />
         </div>
       </div>
 
-      <div className="window-body inline-block bg-[#c0c0c0]">
+      <div className="window-body bg-[#c0c0c0]">
         <ul role="menubar" className="flex w-fit">
           {menuItems.map((menu, i) => (
             <li
@@ -48,10 +77,14 @@ function WindowWithMenu({ title = 'Window', icon, menuItems = [], children }) {
           ))}
         </ul>
 
-        <div className="inline-block">{children}</div>
+        <div className="inline-block">
+          {cloneElement(children, { onCloseModal: close })}
+        </div>
       </div>
     </div>
   );
 }
+Modal.Open = Open;
+Modal.Window = WindowWithMenu;
 
-export default WindowWithMenu;
+export default Modal;

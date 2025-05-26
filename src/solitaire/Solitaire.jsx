@@ -30,9 +30,11 @@ import Foundation from './Foundation';
 import Stock from './Stock';
 import Tableau from './Tableau';
 import Draggable from 'react-draggable';
-import WindowWithMenu from '../ui/WindowWithMenu';
+import Modal from '../ui/Modal';
 import { FaGithubAlt } from 'react-icons/fa';
-import CardBackSelectionWindow from './CardBackSelectionWindow';
+import CardBackSelectionWindow from './CardSelection';
+import WindowTest from '../ui/Window';
+import Window from '../ui/Window';
 
 //TODO:
 // FIND THE POSSIBLE WINNABLE ARRANGEMENT
@@ -205,6 +207,9 @@ function reducer(state, action) {
 
     case ACTIONS.UNDO:
       return state;
+
+    case ACTIONS.CHANGE_CARD:
+      return { ...state, cardBack: action.payload };
     case ACTIONS.DEAL_NUM:
       const deal = action.payload;
       const reset = init();
@@ -229,8 +234,16 @@ function Solitaire() {
   );
 
   const [activeId, setActiveId] = useState([]);
-  const { stock, tableau, foundation, waste, time, gameState, score, drawNum } =
-    state;
+  const {
+    stock,
+    tableau,
+    foundation,
+    waste,
+    gameState,
+    score,
+    drawNum,
+    cardBack,
+  } = state;
   function handleDragStart({ active }) {
     if (!active) return;
     const { card, cardIndex, location, pileIndex } = active.data.current;
@@ -271,42 +284,67 @@ function Solitaire() {
   }
 
   return (
-    <WindowWithMenu menuItems={menuItems(dispatch)} title="Solitaire">
-      <DndContext
-        autoScroll={false}
-        onDragStart={(e) => handleDragStart(e)}
-        onDragEnd={(e) => handleDrag(e)}
-        sensors={sensors}
-      >
-        <div className="inline-block bg-[#007f00] font-mono text-white">
-          <div className="p-3">
-            <div className="mb-5 flex justify-between">
-              <CardBackSelectionWindow />
-              <div className="flex gap-4">
-                <Stock stock={stock} dispatch={dispatch} />
-                <Waste cards={waste} dispatch={dispatch} drawNum={drawNum} />
+    <>
+      <Modal>
+        <Window menuItems={menuItems(dispatch)} title="Solitaire">
+          <DndContext
+            autoScroll={false}
+            onDragStart={(e) => handleDragStart(e)}
+            onDragEnd={(e) => handleDrag(e)}
+            sensors={sensors}
+          >
+            <div className="inline-block bg-[#007f00] font-mono text-white">
+              <div className="p-3">
+                <div className="mb-5 flex justify-between">
+                  <Modal.Open opens="settings">
+                    <button>Open deck</button>
+                  </Modal.Open>
+                  <div className="absolute left-1/2 top-1/2 z-[1000] -translate-x-1/2 -translate-y-1/2 transform">
+                    <Modal.Window name="settings">
+                      <CardBackSelectionWindow
+                        dispatch={dispatch}
+                        cardBack={cardBack}
+                      />
+                    </Modal.Window>
+                  </div>
+                  <div className="flex gap-4">
+                    <Stock
+                      stock={stock}
+                      dispatch={dispatch}
+                      cardBack={cardBack}
+                    />
+                    <Waste
+                      cards={waste}
+                      dispatch={dispatch}
+                      drawNum={drawNum}
+                    />
+                  </div>
+                  <Foundation foundation={foundation} dispatch={dispatch} />
+                </div>
+
+                <DragOverlay>
+                  {activeId.length > 0 && (
+                    <Pile cards={activeId} pileIndex={0} />
+                  )}
+                </DragOverlay>
+                <Tableau
+                  cardBack={cardBack}
+                  activeId={activeId}
+                  tableau={tableau}
+                  dispatch={dispatch}
+                />
               </div>
-              <Foundation foundation={foundation} dispatch={dispatch} />
+
+              <ScoreAndTime
+                score={score}
+                dispatch={dispatch}
+                gameState={gameState}
+              />
             </div>
-
-            <DragOverlay>
-              {activeId.length > 0 && <Pile cards={activeId} pileIndex={0} />}
-            </DragOverlay>
-            <Tableau
-              activeId={activeId}
-              tableau={tableau}
-              dispatch={dispatch}
-            />
-          </div>
-
-          <ScoreAndTime
-            score={score}
-            dispatch={dispatch}
-            gameState={gameState}
-          />
-        </div>
-      </DndContext>
-    </WindowWithMenu>
+          </DndContext>
+        </Window>
+      </Modal>
+    </>
   );
 }
 
@@ -334,7 +372,10 @@ const menuItems = (dispatch) => {
       label: 'Help',
       underline: 'H',
       items: [
-        { label: 'Deck', action: () => console.log('hello') },
+        {
+          label: 'Deck',
+          action: () => <Modal.Open opens="settings"></Modal.Open>,
+        },
         {
           label: (
             <span className="flex items-center gap-1">

@@ -10,8 +10,8 @@ import {
   initBoard,
 } from '../minesweeper/config';
 import '../winxp/theme.min.css';
-import WindowWithMenu from '../ui/WindowWithMenu';
 import { FaGithubAlt } from 'react-icons/fa';
+import Window from '../ui/Window';
 
 const borderStyle = `border-b-4 border-l-4 border-r-4 border-t-4 border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white`;
 
@@ -196,7 +196,7 @@ function MineSweeper() {
     },
   ];
   return (
-    <WindowWithMenu
+    <Window
       menuItems={menuItems}
       title="Mine Sweeper"
       icon="assets/minesweeper/mine.png"
@@ -227,7 +227,7 @@ function MineSweeper() {
           ))}
         </div>
       </div>
-    </WindowWithMenu>
+    </Window>
   );
 }
 

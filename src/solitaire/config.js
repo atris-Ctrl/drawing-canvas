@@ -39,12 +39,14 @@ export const ACTIONS = {
   RESET: 'reset',
   UNDO: 'undo',
   DEAL_NUM: 'deal_num',
+  CHANGE_CARD: 'change_card',
 };
 
 export const createMoveAction = (location, card, pileIndex, cardIndex) => ({
   type: ACTIONS.MOVE_CARD,
   payload: { from: location, card, pileIndex, cardIndex },
 });
+export const createChangeDeckAction = (key) => ({ type: ACTIONS.CHANGE_CARD, payload: Number(key) })
 export const createDrawAction = () => ({ type: ACTIONS.DRAW });
 export const createDragAction = (
   fromLocation,
