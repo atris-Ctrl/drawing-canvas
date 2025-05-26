@@ -4,6 +4,7 @@ import DrawingCanvas from './DrawingCanvas';
 import { DrawProvider } from './DrawProvider';
 import ToolBar from './ToolBar';
 import Header from '../../ui/Header';
+import ClosableWindow from '../../ui/ClosableWindow';
 
 function DrawApp() {
   const [isVisible, setIsVisible] = useState(true);
@@ -14,8 +15,8 @@ function DrawApp() {
   };
 
   return (
-    <div className="">
-      <Header />
+    <ClosableWindow>
+      {/* <Header /> */}
       <div className="flex flex-row">
         <DrawProvider>
           {isVisible ? (
@@ -32,7 +33,7 @@ function DrawApp() {
           </div>
         </DrawProvider>
       </div>
-    </div>
+    </ClosableWindow>
   );
 }
 

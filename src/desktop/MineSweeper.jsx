@@ -12,6 +12,7 @@ import {
 import '../winxp/theme.min.css';
 import { FaGithubAlt } from 'react-icons/fa';
 import Window from '../ui/Window';
+import ClosableWindow from '../ui/ClosableWindow';
 
 const borderStyle = `border-b-4 border-l-4 border-r-4 border-t-4 border-b-[#7a7a7a] border-l-white border-r-[#7a7a7a] border-t-white`;
 
@@ -196,7 +197,7 @@ function MineSweeper() {
     },
   ];
   return (
-    <Window
+    <ClosableWindow
       menuItems={menuItems}
       title="Mine Sweeper"
       icon="assets/minesweeper/mine.png"
@@ -227,7 +228,7 @@ function MineSweeper() {
           ))}
         </div>
       </div>
-    </Window>
+    </ClosableWindow>
   );
 }
 

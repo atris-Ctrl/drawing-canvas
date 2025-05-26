@@ -30,23 +30,21 @@ function DesktopApps() {
   }
   return (
     <div className="flex gap-10 p-4">
-      <div className="flex flex-col gap-10">
+      <div className="grid grid-cols-2 gap-1">
         <DesktopIcon
           iconSrc="/assets/palette.png"
           label="Canvas"
           onDoubleClick={handleDoubleClick}
         />
         <DesktopIcon iconSrc="/assets/vice_leader_circus.png" label="Mouse" />
-      </div>
-      <div className="flex flex-col gap-10">
         <DesktopIcon iconSrc="/assets/vice_leader_circus.png" label="Mouse" />
         <DesktopIcon iconSrc="/assets/vice_leader_circus.png" label="Mouse" />
         <DesktopIcon
           iconSrc="/assets/icons/user_account.ico"
           label="User Account"
         />
+        <DesktopIcon iconSrc="/assets/vice_leader_circus.png" label="Mouse" />
       </div>
-      <DesktopIcon iconSrc="/assets/vice_leader_circus.png" label="Mouse" />
     </div>
   );
 }

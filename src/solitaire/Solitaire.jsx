@@ -305,7 +305,7 @@ function Solitaire() {
                     <button>Open deck</button>
                   </Modal.Open>
                   <div className="absolute left-1/2 top-1/2 z-[1000] -translate-x-1/2 -translate-y-1/2 transform">
-                    <Modal.Window name="settings">
+                    <Modal.Window name="settings" title="Card Selection">
                       <CardBackSelectionWindow
                         dispatch={dispatch}
                         cardBack={cardBack}

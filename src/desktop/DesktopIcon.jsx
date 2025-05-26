@@ -24,20 +24,20 @@ function DesktopIcon({ iconSrc, label, onDoubleClick }) {
         <div
           onClick={handleClick}
           onDoubleClick={onDoubleClick}
-          className={`absolute h-fit w-20 w-fit cursor-pointer select-none text-center`}
+          className={`h-30 w-20 cursor-pointer select-none text-center`}
         >
           <div
-            className={`flex flex-col items-center py-1 ${
-              selected ? 'border border-dashed border-white' : ''
+            className={`flex flex-col items-center py-[1px] ${
+              selected && 'border border-dashed border-white'
             } hover:bg-blue-200/50`}
           >
             <img
               src={iconSrc}
               onDragStart={(e) => e.preventDefault()}
               alt="icon"
-              className="mb-1 h-auto w-12"
+              className="w-10"
             />
-            <span className="text-sm font-bold text-white drop-shadow">
+            <span className="text-wrap text-sm font-bold text-white drop-shadow">
               {label}
             </span>
           </div>
