@@ -24,7 +24,7 @@ function DesktopIcon({ iconSrc, label, onDoubleClick }) {
         <div
           onClick={handleClick}
           onDoubleClick={onDoubleClick}
-          className={`h-30 w-20 cursor-pointer select-none text-center`}
+          className="h-24 sm:h-28 md:h-32 w-16 sm:w-20 md:w-24 cursor-pointer select-none text-center"
         >
           <div
             className={`flex flex-col items-center py-[1px] ${
@@ -35,9 +35,9 @@ function DesktopIcon({ iconSrc, label, onDoubleClick }) {
               src={iconSrc}
               onDragStart={(e) => e.preventDefault()}
               alt="icon"
-              className="w-10"
+              className="w-8 sm:w-10 md:w-12"
             />
-            <span className="text-wrap text-sm font-bold text-white drop-shadow">
+            <span className="text-wrap text-xs sm:text-sm md:text-base font-bold text-white drop-shadow">
               {label}
             </span>
           </div>

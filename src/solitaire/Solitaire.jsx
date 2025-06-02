@@ -43,7 +43,6 @@ import {
 //TODO:
 // FIND THE POSSIBLE WINNABLE ARRANGEMENT
 // UNDO
-// SCORE FUNCTION
 
 function reducer(state, action) {
   switch (action.type) {

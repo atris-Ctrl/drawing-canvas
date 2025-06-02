@@ -3,7 +3,6 @@ import Button from '../../ui/Button';
 import DrawingCanvas from './DrawingCanvas';
 import { DrawProvider } from './DrawProvider';
 import ToolBar from './ToolBar';
-import Header from '../../ui/Header';
 import ClosableWindow from '../../ui/ClosableWindow';
 
 function DrawApp() {
