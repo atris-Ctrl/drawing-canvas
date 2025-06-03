@@ -137,7 +137,6 @@ function AudioProvider({ children }) {
 
   function handleSkipSong(value) {
     const newIndex = jumpSong(value, songIndex);
-    console.log(newIndex);
     setSongIndex(newIndex);
     skipSong(newIndex);
   }
