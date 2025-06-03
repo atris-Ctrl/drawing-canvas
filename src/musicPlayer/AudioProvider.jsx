@@ -2,11 +2,12 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from 'react';
 import { jumpSong, musicPath } from './config';
-
+import { Howl } from 'howler';
 const AudioContext = createContext();
 
 function AudioProvider({ children }) {
@@ -40,13 +41,12 @@ function AudioProvider({ children }) {
   ];
   function playSong() {
     soundRef.current.play();
-    setIsPlaying(true);
+    cancelAnimationFrame(animationRef.current);
     animationRef.current = requestAnimationFrame(animateProgress);
   }
 
   function pauseSong() {
     soundRef.current.pause();
-    setIsPlaying(false);
     cancelAnimationFrame(animationRef.current);
   }
   function stopSong() {
@@ -61,8 +61,8 @@ function AudioProvider({ children }) {
     const musicFile = playList[index];
     soundRef.current = new Howl({
       src: `${musicPath}/${musicFile.file}`,
-      autoplay: false,
-      loop: false,
+      autoplay: isAutoPlay,
+      loop: isLoop,
       html5: true,
       volume: volume / 100,
       onload: () => {
@@ -75,9 +75,10 @@ function AudioProvider({ children }) {
     });
   };
 
-  function skipSong(index) {
+  async function skipSong(index) {
     stopSong();
     initSound(index);
+    setIsPlaying(true);
     playSong();
   }
   const animateProgress = () => {
@@ -102,6 +103,7 @@ function AudioProvider({ children }) {
     setIsDragging(true);
     setIsPlaying(false);
   }
+
   function handleDragEnd() {
     if (soundRef.current) {
       setIsPlaying(true);
@@ -110,8 +112,9 @@ function AudioProvider({ children }) {
       soundRef.current.seek(newSeek);
       setProgress(newSeek);
     }
-    setIsDragging(false);
+    cancelAnimationFrame(animationRef.current);
     animationRef.current = requestAnimationFrame(animateProgress);
+    setIsDragging(false);
   }
 
   function handleProgressBar() {
@@ -140,6 +143,14 @@ function AudioProvider({ children }) {
     setSongIndex(newIndex);
     skipSong(newIndex);
   }
+
+  useEffect(() => {
+    initSound(songIndex);
+    return () => {
+      soundRef.current.unload(); // Clean up sound
+      cancelAnimationFrame(animationRef.current);
+    };
+  }, []);
 
   const value = {
     playList,

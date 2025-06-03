@@ -1,10 +1,14 @@
 import { AudioProvider } from './AudioProvider';
+import MusicList from './MusicList';
 import MusicPlayer from './MusicPlayer';
 
 function MusicApp() {
   return (
     <AudioProvider>
-      <MusicPlayer />
+      <div className="flex">
+        <MusicPlayer />
+        <MusicList />
+      </div>
     </AudioProvider>
   );
 }
