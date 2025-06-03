@@ -93,6 +93,15 @@ function AudioProvider({ children }) {
     const sound = soundRef.current;
     if (sound) stopSong();
   };
+  useEffect(() => {
+    const sound = soundRef.current;
+    if (!sound) return;
+    if (isPlaying) {
+      playSong();
+    } else {
+      pauseSong();
+    }
+  }, [isPlaying, soundRef]);
 
   const handleVolume = (e) => {
     const newVolume = Number(e.target.value);
@@ -101,6 +110,7 @@ function AudioProvider({ children }) {
   };
   function handleDragStart() {
     setIsDragging(true);
+    // cancelAnimationFrame(animationRef.current);
     setIsPlaying(false);
   }
 
@@ -112,7 +122,6 @@ function AudioProvider({ children }) {
       soundRef.current.seek(newSeek);
       setProgress(newSeek);
     }
-    cancelAnimationFrame(animationRef.current);
     animationRef.current = requestAnimationFrame(animateProgress);
     setIsDragging(false);
   }
@@ -138,10 +147,13 @@ function AudioProvider({ children }) {
     soundRef.current.seek(soundRef.current.seek() + value);
   }
 
+  function jumpSongByIndex(index) {
+    setSongIndex(index);
+    skipSong(index);
+  }
   function handleSkipSong(value) {
     const newIndex = jumpSong(value, songIndex);
-    setSongIndex(newIndex);
-    skipSong(newIndex);
+    jumpSongByIndex(newIndex);
   }
 
   useEffect(() => {
@@ -155,6 +167,7 @@ function AudioProvider({ children }) {
   const value = {
     playList,
     initSound,
+    jumpSongByIndex,
     animationRef,
     progressRef,
     soundRef,
@@ -163,10 +176,10 @@ function AudioProvider({ children }) {
     progress,
     duration,
     songIndex,
-
     isDragging,
     isAutoPlay,
     isLoop,
+    setIsLoop,
     handleProgressBar,
     handleSkipSong,
     handleFastSkip,
@@ -177,6 +190,7 @@ function AudioProvider({ children }) {
     setProgress,
     setDuration,
     setIsPlaying,
+    setIsAutoPlay,
     playSong,
     stopSong,
     pauseSong,
