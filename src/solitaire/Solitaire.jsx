@@ -289,28 +289,20 @@ function Solitaire() {
   return (
     <>
       <Modal>
-        <ClosableWindow menuItems={menuItems(dispatch)} title="Solitaire">
+        <ClosableWindow
+          icon="assets/solitaire/icon/sol.ico"
+          menuItems={menuItems(dispatch)}
+          title="Solitaire"
+        >
           <DndContext
             autoScroll={false}
             onDragStart={(e) => handleDragStart(e)}
             onDragEnd={(e) => handleDrag(e)}
             sensors={sensors}
-            // modifiers={[restrictToParentElement]}
           >
             <div className="relative inline-block bg-[#007f00] font-mono text-white">
               <div className="p-3">
                 <div className="mb-5 flex justify-between">
-                  <Modal.Open opens="settings">
-                    <button>Open deck</button>
-                  </Modal.Open>
-                  <div className="absolute left-1/2 top-1/2 z-[1000] -translate-x-1/2 -translate-y-1/2 transform">
-                    <Modal.Window name="settings" title="Card Selection">
-                      <CardBackSelectionWindow
-                        dispatch={dispatch}
-                        cardBack={cardBack}
-                      />
-                    </Modal.Window>
-                  </div>
                   <div className="flex gap-4">
                     <Stock
                       stock={stock}
@@ -343,6 +335,7 @@ function Solitaire() {
                 score={score}
                 dispatch={dispatch}
                 gameState={gameState}
+                cardBack={cardBack}
               />
             </div>
           </DndContext>

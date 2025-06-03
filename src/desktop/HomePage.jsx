@@ -5,6 +5,7 @@ import DesktopIcon from './DesktopIcon';
 import CommandPrompt from './CommandPrompt';
 import MineSweeper from './MineSweeper';
 import { desktopApps } from '../config/desktopApps';
+import Solitaire from '../solitaire/Solitaire';
 
 function HomePage() {
   return (
@@ -18,15 +19,12 @@ function HomePage() {
             className="h-full w-full object-cover object-center"
           />
         </div>
-        
-        {/* Content */}
         <div className="flex-1 overflow-hidden p-2 sm:p-3 md:p-4">
           <DesktopApps />
         </div>
         <MineSweeper />
-        <CommandPrompt />
+        <Solitaire />
         <Chicken />
-        {/* <ToDoListPage /> */}
         <Footer />
       </div>
     </>
@@ -43,11 +41,11 @@ function DesktopApps() {
   };
 
   return (
-    <div className="flex justify-center w-full">
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 md:gap-4 p-2 sm:p-3 md:p-4">
+    <div className="flex w-full justify-center">
+      <div className="grid grid-cols-2 gap-2 p-2 sm:grid-cols-3 sm:gap-3 sm:p-3 md:grid-cols-4 md:gap-4 md:p-4 lg:grid-cols-5 xl:grid-cols-6">
         {desktopApps
-          .filter(app => app.enabled)
-          .map(app => (
+          .filter((app) => app.enabled)
+          .map((app) => (
             <DesktopIcon
               key={app.id}
               iconSrc={app.iconSrc}

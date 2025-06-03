@@ -22,13 +22,7 @@ function Draggable({ children, id, data, disabled }) {
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      className="overflow-hidden border border-red-500"
-      {...attributes}
-      {...listeners}
-      style={style}
-    >
+    <div ref={setNodeRef} {...attributes} {...listeners} style={style}>
       {children}
     </div>
   );

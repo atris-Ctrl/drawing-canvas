@@ -5,6 +5,8 @@ import StartPlane from './desktop/StartPlane';
 import Solitaire from './solitaire/Solitaire';
 import './winxp/skins/default.css';
 import './winxp/theme.css';
+import MusicPlayer from './musicPlayer/MusicPlayer';
+import MusicApp from './musicPlayer/MusicApp';
 
 function App() {
   return (
@@ -14,7 +16,9 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="canvas" element={<DrawApp />} />
           <Route path="game" element={<Solitaire />}></Route>
+
           <Route path="mine" element={<StartPlane />}></Route>
+          <Route path="music" element={<MusicApp />}></Route>
         </Routes>
       </BrowserRouter>
     </div>
