@@ -31,6 +31,7 @@ function Card({
 
   const data = { location, pileIndex, cardIndex, card };
   const cardPath = faceUp ? cardPaths[id] : cardBackPaths[cardBack];
+  console.log(cardPath);
   const isDraggableDisabled = disabledClick || !faceUp;
 
   return (
