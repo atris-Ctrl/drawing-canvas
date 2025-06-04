@@ -5,5 +5,5 @@ export default defineConfig({
   build: {
     outDir: 'build', // CRA's default build output
   },
-  base: process.env.VITE_BASE_PATH || '/drawing-canvas',
+  // base: process.env.VITE_BASE_PATH || '/drawing-canvas',
 });
