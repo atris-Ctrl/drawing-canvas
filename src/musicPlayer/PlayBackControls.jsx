@@ -17,13 +17,12 @@ function PlaybackControls() {
     isPlaying,
     setIsPlaying,
     handleStop,
-    handleFastSkip,
-    handleSkipSong,
-    setIsAutoPlay,
-    setIsLoop,
+    handleNextSong,
+    handlePrevSong,
+    toggleAutoPlay,
+    handleLoop,
     isLoop,
     isAutoPlay,
-
     volume,
   } = useAudio();
 
@@ -38,8 +37,8 @@ function PlaybackControls() {
   return (
     <div className="mx-auto mt-6 flex w-fit items-center rounded-lg border border-gray-300 bg-gray-100 px-6 py-3 shadow-lg">
       <div
-        onClick={() => handleSkipSong(-1)}
-        onKeyDown={handleKeyDown(() => handleSkipSong(-1))}
+        onClick={handlePrevSong}
+        onKeyDown={handleKeyDown(handlePrevSong)}
         role="button"
         tabIndex={0}
         title="Previous"
@@ -47,18 +46,6 @@ function PlaybackControls() {
         style={{ width: 40, height: 40 }}
       >
         <FaStepBackward className="h-6 w-6 text-gray-700" />
-      </div>
-
-      <div
-        onClick={() => handleFastSkip(-5)}
-        onKeyDown={handleKeyDown(() => handleFastSkip(-5))}
-        role="button"
-        tabIndex={0}
-        title="-5 seconds"
-        className="mx-1 flex cursor-pointer items-center justify-center rounded-full p-2 hover:bg-blue-100"
-        style={{ width: 40, height: 40 }}
-      >
-        <FaBackward className="h-6 w-6 text-gray-700" />
       </div>
 
       <div
@@ -90,20 +77,8 @@ function PlaybackControls() {
       </div>
 
       <div
-        onClick={() => handleFastSkip(5)}
-        onKeyDown={handleKeyDown(() => handleFastSkip(5))}
-        role="button"
-        tabIndex={0}
-        title="+5 seconds"
-        className="mx-1 flex cursor-pointer items-center justify-center rounded-full p-2 hover:bg-blue-100"
-        style={{ width: 40, height: 40 }}
-      >
-        <FaForward className="h-6 w-6 text-gray-700" />
-      </div>
-
-      <div
-        onClick={() => handleSkipSong(1)}
-        onKeyDown={handleKeyDown(() => handleSkipSong(1))}
+        onClick={handleNextSong}
+        onKeyDown={handleKeyDown(handleNextSong)}
         role="button"
         tabIndex={0}
         title="Next"
@@ -114,11 +89,11 @@ function PlaybackControls() {
       </div>
 
       <div
-        onClick={() => setIsAutoPlay((prev) => !prev)}
-        onKeyDown={handleKeyDown(() => setIsAutoPlay((prev) => !prev))}
+        onClick={toggleAutoPlay}
+        onKeyDown={handleKeyDown(toggleAutoPlay)}
         role="button"
         tabIndex={0}
-        title="AutoPlay"
+        title={isAutoPlay ? "Disable Autoplay" : "Enable Autoplay"}
         className="mx-1 flex cursor-pointer items-center justify-center rounded-full p-2 hover:bg-blue-100"
         style={{ width: 40, height: 40 }}
       >
@@ -128,11 +103,11 @@ function PlaybackControls() {
       </div>
 
       <div
-        onClick={() => setIsLoop((prev) => !prev)}
-        onKeyDown={handleKeyDown(() => setIsLoop((prev) => !prev))}
+        onClick={handleLoop}
+        onKeyDown={handleKeyDown(handleLoop)}
         role="button"
         tabIndex={0}
-        title="Loop"
+        title={isLoop ? "Disable Loop" : "Enable Loop"}
         className="mx-1 flex cursor-pointer items-center justify-center rounded-full p-2 hover:bg-blue-100"
         style={{ width: 40, height: 40 }}
       >

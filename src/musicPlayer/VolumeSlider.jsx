@@ -19,8 +19,7 @@ function VolumeSlider() {
         max="100"
         value={volume}
         onChange={handleVolume}
-        className="w-full accent-blue-600"
-        style={{ accentColor: '#2563eb' }} // fallback for accent color
+        className="w-full"
       />
       <span className="w-8 text-right text-xs text-gray-700">{volume}%</span>
     </div>
