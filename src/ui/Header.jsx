@@ -1,5 +1,4 @@
-import "../index.css";
-import "xp.css/dist/XP.css";
+import '../index.css';
 
 function Header() {
   return (

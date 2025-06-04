@@ -1,236 +1,389 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useReducer, useState } from 'react';
 import {
-  ItemTypes,
   ACTIONS,
   GAME_STATE,
   init,
-  isBlack,
-  initialState,
+  LOCATIONS,
+  findValidSpot,
+  checkWin,
+  canMoveFoundation,
+  canMovePile,
+  scoreMap,
+  createDragAction,
+  createResetAction,
+  createDealAction,
+  restoreStock,
+  calculateScore,
 } from './config';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import {
+  DndContext,
+  DragOverlay,
+  MouseSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import ScoreAndTime from './ScoreAndTime';
+import Pile from './Pile';
+import Waste from './Waste';
+import Foundation from './Foundation';
+import Stock from './Stock';
+import Tableau from './Tableau';
+import Draggable from './Draggable';
+// import Draggable from 'react-draggable';
+import Modal from '../ui/Modal';
+import { FaGithubAlt } from 'react-icons/fa';
+import CardBackSelectionWindow from './CardSelection';
+import ClosableWindow from '../ui/ClosableWindow';
+import {
+  restrictToFirstScrollableAncestor,
+  restrictToParentElement,
+} from '@dnd-kit/modifiers';
+
+//TODO:
+// FIND THE POSSIBLE WINNABLE ARRANGEMENT
+// UNDO
 
 function reducer(state, action) {
   switch (action.type) {
+    case ACTIONS.FLIP_CARD:
+      // WHAT IS THIS SO MESSY !!!
+      const {
+        pileIndex: flipPileIndex,
+        cardIndex: flipCardIndex,
+        location: flipLocation,
+      } = action.payload;
+
+      if (flipLocation !== LOCATIONS.TABLEAU) return;
+      const { tableau: flipTableau } = state;
+
+      const newFlipTableau = [...flipTableau];
+      const flipPile = [...flipTableau[flipPileIndex]];
+
+      const flipCard = { ...flipPile[flipCardIndex], faceUp: true };
+      if (flipCardIndex !== flipPile.length - 1) return state;
+      flipPile[flipCardIndex] = flipCard;
+      newFlipTableau[flipPileIndex] = flipPile;
+      return {
+        ...state,
+        tableau: newFlipTableau,
+        gameState: GAME_STATE.RUNNING,
+        score: state.score + scoreMap.FLIP_CARD,
+      };
+
     case ACTIONS.DRAW:
-      const { stock: drawStock, waste: drawWaste } = state;
+      const { stock: drawStock, waste: drawWaste, drawNum } = state;
       if (drawStock.length === 0 && drawWaste.length > 0) {
         // Recycle waste back to stock (face down)
-        const resetStock = drawWaste.map((card) => ({
-          ...card,
-          faceUp: false,
-        }));
-        return { ...state, stock: resetStock, waste: [] };
+        const resetStock = restoreStock(drawWaste, drawNum);
+        return {
+          ...state,
+          stock: resetStock,
+          waste: [],
+          score: state.score + scoreMap.DRAW_FINISH,
+        };
       }
 
       if (drawStock.length > 0) {
+        const numToDraw = Math.min(drawNum, drawStock.length);
         const newStock = [...drawStock];
-        const newCard = newStock.pop();
-        newCard.faceUp = true;
-        return { ...state, stock: newStock, waste: [newCard, ...drawWaste] };
+
+        const drawnCards = newStock
+          .splice(-numToDraw)
+          .map((card) => ({ ...card, faceUp: true }))
+          .reverse();
+
+        return {
+          ...state,
+          stock: newStock,
+          waste: [...drawnCards, ...drawWaste],
+          gameState: GAME_STATE.RUNNING,
+        };
       }
       return state;
 
-    case ACTIONS.MOVE_CARD:
-      return state;
-    case ACTIONS.MOVE_TO_FOUNDATION:
-      console.log('move to foundation');
-      const { foundation, tableau, waste } = state;
-      const { index, card, from, pileIndex, cardIndex } = action.payload;
+    case ACTIONS.DRAG_CARD:
+      const {
+        fromLocation,
+        toLocation,
+        pileIndex,
+        card,
+        cardIndex: fromCardIndex,
+        toIndex: toDestIndex,
+      } = action.payload;
 
-      if (!card?.faceUp) return state;
-      const newFoundation = [...foundation];
-      const newTableau = [...tableau];
-      const newWaste = [...waste];
+      const dragFoundation = [...state.foundation];
+      const dragTableau = [...state.tableau];
+      const dragWaste = [...state.waste];
+      let dragMoveCards = [card];
+      const totalScore = calculateScore(fromLocation, toLocation);
 
-      if (from === 'tableau') {
-        const newPile = [...newTableau[pileIndex]];
-        newTableau[pileIndex] = newPile.slice(0, cardIndex);
-      } else if (from === 'waste') {
-        newWaste.shift();
-      } else {
-        return state;
+      if (toLocation === LOCATIONS.FOUNDATION) {
+        if (!canMoveFoundation(card, dragFoundation[toDestIndex])) return state;
+      } else if (toLocation === LOCATIONS.TABLEAU) {
+        const currentPile = dragTableau[toDestIndex];
+        if (!canMovePile(card, currentPile)) return state;
       }
-      newFoundation[index].unshift(card);
-      console.log(newFoundation);
+
+      if (fromLocation === LOCATIONS.TABLEAU) {
+        const newPile = [...dragTableau[pileIndex]];
+
+        dragMoveCards = newPile.splice(fromCardIndex);
+
+        dragTableau[pileIndex] = newPile;
+      } else if (fromLocation === LOCATIONS.WASTE) {
+        dragWaste.shift();
+      } else if (fromLocation === LOCATIONS.FOUNDATION) {
+        dragFoundation[pileIndex].pop();
+      }
+
+      if (toLocation === LOCATIONS.FOUNDATION) {
+        // so if the card we click is what the foundation want then there is should not add the whole deck to foundation
+        if (dragMoveCards.length > 1) return state;
+        dragFoundation[toDestIndex].push(...dragMoveCards);
+      } else if (toLocation === LOCATIONS.TABLEAU)
+        dragTableau[toDestIndex].push(...dragMoveCards);
+      const isWinning = checkWin(dragFoundation);
+      const currentGameState = isWinning ? GAME_STATE.WIN : state.gameState;
       return {
         ...state,
+        gameState: currentGameState,
+        foundation: dragFoundation,
+        tableau: dragTableau,
+        waste: dragWaste,
+        score: state.score + totalScore,
+      };
+    case ACTIONS.MOVE_CARD:
+      const {
+        tableau: currentTableau,
+        foundation: currentFoundation,
+        waste: currentWaste,
+      } = state;
+      const {
+        card: currentCard,
+        from,
+        pileIndex: fromIndex,
+        cardIndex,
+      } = action.payload;
+      const validSpot = findValidSpot(
+        currentCard,
+        currentTableau,
+        currentFoundation,
+      );
+      if (!validSpot) return state;
+      const { location: to, index: toIndex } = validSpot;
+
+      const addScore = calculateScore(from, to);
+      const newFoundation = [...currentFoundation];
+      const newTableau = [...currentTableau];
+      const newWaste = [...currentWaste];
+      let moveCards = [currentCard];
+      // one card in tableau => waste
+      if (from === LOCATIONS.TABLEAU) {
+        const newPile = [...newTableau[fromIndex]];
+        const remainingPile = newPile.slice(0, cardIndex);
+        moveCards = newPile.slice(cardIndex);
+        newTableau[fromIndex] = remainingPile;
+      } else if (from === LOCATIONS.WASTE) newWaste.shift();
+      else if (from === LOCATIONS.FOUNDATION) newFoundation[fromIndex].pop();
+
+      if (to === LOCATIONS.FOUNDATION) {
+        // so if the card we click is what the foundation want then there is should not add the whole deck to foundation
+        if (moveCards.length > 1) return state;
+        newFoundation[toIndex].push(...moveCards);
+      } else if (to === LOCATIONS.TABLEAU)
+        newTableau[toIndex].push(...moveCards);
+      const isWin = checkWin(newFoundation);
+
+      const newGameState = isWin ? GAME_STATE.WIN : GAME_STATE.RUNNING;
+      return {
+        ...state,
+        gameState: newGameState,
         foundation: newFoundation,
         tableau: newTableau,
         waste: newWaste,
+        score: state.score + addScore,
       };
+    case ACTIONS.RESET:
+      const resetState = init();
+      return resetState;
+
+    case ACTIONS.UNDO:
+      return state;
+
+    case ACTIONS.CHANGE_CARD:
+      return { ...state, cardBack: action.payload };
+    case ACTIONS.DEAL_NUM:
+      const deal = action.payload;
+      const reset = init();
+      return { ...reset, drawNum: deal };
     case ACTIONS.TICK:
       if (state.gameState !== GAME_STATE.RUNNING) return state;
       return { ...state, time: state.time + 1 };
-
     default:
       throw new Error('Unknown action type');
   }
 }
 
 function Solitaire() {
-  const [state, dispatch] = useReducer(reducer, initialState, init);
-  const { stock, tableau, foundation, waste, time, gameState, score } = state;
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="inline-block w-full bg-green-800 p-6 font-mono text-white">
-        <div className="mb-8 flex justify-between">
-          <div className="flex gap-4">
-            <Stock stock={stock} waste={waste} dispatch={dispatch} />
-            <Waste cards={waste} dispatch={dispatch} />
-          </div>
-          <Foundation foundation={foundation} dispatch={dispatch} />
-        </div>
-
-        <Tableau tableau={tableau} dispatch={dispatch} />
-
-        <div className="mt-8">
-          <div>Score: {score} &nbsp;&nbsp;</div>
-          <StopWatch time={time} dispatch={dispatch} gameState={gameState} />
-        </div>
-      </div>
-    </DndProvider>
+  const [state, dispatch] = useReducer(reducer, undefined, init);
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
   );
-}
 
-function Tableau({ tableau, dispatch }) {
-  return (
-    <div className="flex justify-start gap-4">
-      {tableau.map((cardPile, i) => (
-        <Pile dispatch={dispatch} key={i} pileIndex={i} cards={cardPile} />
-      ))}
-    </div>
-  );
-}
+  const [activeId, setActiveId] = useState([]);
+  const {
+    stock,
+    tableau,
+    foundation,
+    waste,
+    gameState,
+    score,
+    drawNum,
+    cardBack,
+  } = state;
+  function handleDragStart({ active }) {
+    if (!active) return;
+    const { card, cardIndex, location, pileIndex } = active.data.current;
+    if (location === LOCATIONS.TABLEAU) {
+      const currentPile = tableau[pileIndex];
+      const selectedCard = currentPile.slice(cardIndex, currentPile.length);
+      setActiveId((ids) => [...ids, ...selectedCard]);
+    }
 
-function Pile({ cards, dispatch, pileIndex }) {
-  return (
-    <div className="relative min-h-[300px] w-[60px]">
-      {cards.map((card, index) => (
-        <div
-          key={card.id}
-          className="absolute left-0"
-          style={{
-            top: `${index * 15}px`,
-            zIndex: index,
-          }}
-        >
-          <Card
-            dispatch={dispatch}
-            pileIndex={pileIndex}
-            cardIndex={index}
-            card={card}
-            location="tableau"
-          />
-        </div>
-      ))}
-    </div>
-  );
-}
+    if (location === LOCATIONS.FOUNDATION || location === LOCATIONS.WASTE) {
+      setActiveId([card]);
+    }
+  }
 
-function Stock({ stock, dispatch, waste }) {
-  function handleClick() {
-    dispatch({ type: ACTIONS.DRAW });
+  function handleDrag({ active, over }) {
+    if (active && over) {
+      const cardDragged = active.data.current;
+      const droppable = over.data.current;
+      const {
+        location: fromLocation,
+        pileIndex,
+        cardIndex,
+        card,
+      } = cardDragged;
+      const { index: toIndex, location: toLocation } = droppable;
+      dispatch(
+        createDragAction(
+          fromLocation,
+          pileIndex,
+          cardIndex,
+          card,
+          toIndex,
+          toLocation,
+        ),
+      );
+    }
+    setTimeout(() => setActiveId([]), 200);
   }
 
   return (
-    <div
-      onClick={handleClick}
-      className="flex h-[90px] w-[60px] items-center justify-center rounded border border-white bg-blue-900 shadow-md"
-    ></div>
-  );
-}
-
-function Waste({ cards, dispatch }) {
-  if (cards.length === 0) return null;
-  const card = cards[0];
-
-  return (
-    <div className="relative h-[90px] w-[120px]">
-      <Card
-        key={card.id}
-        dispatch={dispatch}
-        card={card}
-        location="waste"
-        className="absolute transition-all duration-200"
-      />
-    </div>
-  );
-}
-
-function Foundation({ foundation, key, dispatch }) {
-  //   const [{ canDrop }, drop] = useDrop(
-  //     () => ({
-  //       accept: ItemTypes.CARD,
-  //     }),
-  //     [],
-  //   );
-
-  console.log('FOUNDATION', foundation);
-  return (
-    <div className="flex gap-4">
-      {foundation.map((pile, i) => (
-        <div
-          key={i}
-          className="flex h-[90px] w-[60px] items-center justify-center rounded border border-white bg-gray-500 shadow-inner"
+    <>
+      <Modal>
+        <ClosableWindow
+          icon="assets/solitaire/icon/sol.ico"
+          menuItems={menuItems(dispatch)}
+          title="Solitaire"
         >
-          {pile.length === 0 ? (
-            '♢'
-          ) : (
-            <Card dispatch={dispatch} card={pile[0]} location="foundation" />
-          )}
-        </div>
-      ))}
-    </div>
+          <DndContext
+            autoScroll={false}
+            onDragStart={(e) => handleDragStart(e)}
+            onDragEnd={(e) => handleDrag(e)}
+            sensors={sensors}
+          >
+            <div className="relative inline-block bg-[#007f00] font-mono text-white">
+              <div className="p-3">
+                <div className="mb-5 flex justify-between">
+                  <div className="flex gap-4">
+                    <Stock
+                      stock={stock}
+                      dispatch={dispatch}
+                      cardBack={cardBack}
+                    />
+                    <Waste
+                      cards={waste}
+                      dispatch={dispatch}
+                      drawNum={drawNum}
+                    />
+                  </div>
+                  <Foundation foundation={foundation} dispatch={dispatch} />
+                </div>
+
+                <DragOverlay>
+                  {activeId.length > 0 && (
+                    <Pile cards={activeId} pileIndex={0} />
+                  )}
+                </DragOverlay>
+                <Tableau
+                  cardBack={cardBack}
+                  activeId={activeId}
+                  tableau={tableau}
+                  dispatch={dispatch}
+                />
+              </div>
+
+              <ScoreAndTime
+                score={score}
+                dispatch={dispatch}
+                gameState={gameState}
+                cardBack={cardBack}
+              />
+            </div>
+          </DndContext>
+        </ClosableWindow>
+      </Modal>
+    </>
   );
 }
 
-function Card({ card, dispatch, location, pileIndex, cardIndex }) {
-  const { value, suit, faceUp } = card;
-  //   const [{ isDragging }, drag] = useDrag(() => ({
-  //     type: ItemTypes.CARD,
-  //     collect: (monitor) => ({
-  //       isDragging: !!monitor.isDragging(),
-  //     }),
-  //   }));
-
-  function handleClick(e) {
-    e.preventDefault();
-    dispatch({
-      type: ACTIONS.MOVE_TO_FOUNDATION,
-      payload: { index: 0, from: location, card, pileIndex, cardIndex },
-    });
-  }
-  const color = isBlack(suit) ? 'text-black' : 'text-red-600';
-
-  return (
-    <div
-      //   ref={drag}
-      onClick={(e) => handleClick(e)}
-      className={`flex h-[90px] w-[60px] items-center justify-center rounded border border-black bg-white shadow-md ${
-        faceUp ? color : 'bg-blue-800'
-      } ${true ? 'opacity-50' : 'opacity-100'} `}
-    >
-      {faceUp ? (
-        <span>
-          {suit} {value}
-        </span>
-      ) : (
-        '?'
-      )}
-    </div>
-  );
-}
-
-function StopWatch({ gameState, dispatch, time }) {
-  useEffect(() => {
-    let timer;
-    if (gameState === GAME_STATE.RUNNING)
-      timer = setInterval(() => dispatch({ type: ACTIONS.TICK }), 1000);
-    return () => clearInterval(timer);
-  }, [gameState]);
-
-  return <div>Time : {time}</div>;
-}
+const menuItems = (dispatch) => {
+  return [
+    {
+      label: 'Game',
+      underline: 'G',
+      items: [
+        {
+          label: 'Reset',
+          action: () => dispatch(createResetAction()),
+        },
+        {
+          label: 'Draw 1',
+          action: () => dispatch(createDealAction(1)),
+        },
+        {
+          label: 'Draw 3',
+          action: () => dispatch(createDealAction(3)),
+        },
+      ],
+    },
+    {
+      label: 'Help',
+      underline: 'H',
+      items: [
+        {
+          label: 'Deck',
+          action: () => <Modal.Open opens="settings"></Modal.Open>,
+        },
+        {
+          label: (
+            <span className="flex items-center gap-1">
+              Github <FaGithubAlt />
+            </span>
+          ),
+          href: 'https://github.com/atris-Ctrl',
+        },
+      ],
+    },
+  ];
+};
 
 export default Solitaire;
