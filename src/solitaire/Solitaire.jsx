@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import { useReducer, useRef, useState, useEffect } from 'react';
 import {
   ACTIONS,
   GAME_STATE,
@@ -38,7 +38,9 @@ import ClosableWindow from '../ui/ClosableWindow';
 import {
   restrictToFirstScrollableAncestor,
   restrictToParentElement,
+  restrictToWindowEdges,
 } from '@dnd-kit/modifiers';
+import { Draggable as ReactDraggable } from 'react-draggable';
 
 //TODO:
 // FIND THE POSSIBLE WINNABLE ARRANGEMENT
@@ -226,7 +228,11 @@ function reducer(state, action) {
 }
 
 function Solitaire() {
+  const overlayContainerRef = useRef();
   const [state, dispatch] = useReducer(reducer, undefined, init);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  
   const sensors = useSensors(
     useSensor(MouseSensor),
     useSensor(PointerSensor, {
@@ -247,8 +253,25 @@ function Solitaire() {
     drawNum,
     cardBack,
   } = state;
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (isDragging) {
+        const rect = overlayContainerRef.current.getBoundingClientRect();
+        setMousePosition({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        });
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [isDragging]);
+
   function handleDragStart({ active }) {
     if (!active) return;
+    setIsDragging(true);
     const { card, cardIndex, location, pileIndex } = active.data.current;
     if (location === LOCATIONS.TABLEAU) {
       const currentPile = tableau[pileIndex];
@@ -283,63 +306,82 @@ function Solitaire() {
         ),
       );
     }
+    setIsDragging(false);
     setTimeout(() => setActiveId([]), 200);
   }
 
   return (
     <>
       <Modal>
-        <ClosableWindow
-          icon="assets/solitaire/icon/sol.ico"
-          menuItems={menuItems(dispatch)}
-          title="Solitaire"
-        >
-          <DndContext
-            autoScroll={false}
-            onDragStart={(e) => handleDragStart(e)}
-            onDragEnd={(e) => handleDrag(e)}
-            sensors={sensors}
+        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+          <ClosableWindow
+            icon="assets/solitaire/icon/sol.ico"
+            menuItems={menuItems(dispatch)}
+            title="Solitaire"
           >
-            <div className="relative inline-block bg-[#007f00] font-mono text-white">
-              <div className="p-3">
-                <div className="mb-5 flex justify-between">
-                  <div className="flex gap-4">
-                    <Stock
-                      stock={stock}
-                      dispatch={dispatch}
+            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+              <DndContext
+                autoScroll={false}
+                onDragStart={(e) => handleDragStart(e)}
+                onDragEnd={(e) => handleDrag(e)}
+                sensors={sensors}
+                modifiers={[]}
+              >
+                <div
+                  ref={overlayContainerRef}
+                  className="relative inline-block bg-[#007f00] font-mono text-white"
+                  style={{ position: 'relative', width: '100%', height: '100%' }}
+                >
+                  <div className="p-3">
+                    <div className="mb-5 flex justify-between">
+                      <div className="flex gap-4">
+                        <Stock
+                          stock={stock}
+                          dispatch={dispatch}
+                          cardBack={cardBack}
+                        />
+                        <Waste
+                          cards={waste}
+                          dispatch={dispatch}
+                          drawNum={drawNum}
+                        />
+                      </div>
+                      <Foundation foundation={foundation} dispatch={dispatch} />
+                    </div>
+
+                    <DragOverlay 
+                      container={overlayContainerRef.current}
+                      dropAnimation={{
+                        duration: 200,
+                        easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+                      }}
+                      style={{ 
+                        zIndex: 9999,
+                      }}
+                    >
+                      {activeId.length > 0 && (
+                        <Pile cards={activeId} pileIndex={0} />
+                      )}
+                    </DragOverlay>
+                    <Tableau
                       cardBack={cardBack}
-                    />
-                    <Waste
-                      cards={waste}
+                      activeId={activeId}
+                      tableau={tableau}
                       dispatch={dispatch}
-                      drawNum={drawNum}
                     />
                   </div>
-                  <Foundation foundation={foundation} dispatch={dispatch} />
+
+                  <ScoreAndTime
+                    score={score}
+                    dispatch={dispatch}
+                    gameState={gameState}
+                    cardBack={cardBack}
+                  />
                 </div>
-
-                <DragOverlay>
-                  {activeId.length > 0 && (
-                    <Pile cards={activeId} pileIndex={0} />
-                  )}
-                </DragOverlay>
-                <Tableau
-                  cardBack={cardBack}
-                  activeId={activeId}
-                  tableau={tableau}
-                  dispatch={dispatch}
-                />
-              </div>
-
-              <ScoreAndTime
-                score={score}
-                dispatch={dispatch}
-                gameState={gameState}
-                cardBack={cardBack}
-              />
+              </DndContext>
             </div>
-          </DndContext>
-        </ClosableWindow>
+          </ClosableWindow>
+        </div>
       </Modal>
     </>
   );

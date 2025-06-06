@@ -1,3 +1,5 @@
+import Draggable from 'react-draggable';
+
 function Window({
   title = 'Window',
   icon,
@@ -16,7 +18,6 @@ function Window({
           <button onClick={closeButton} data-close="" />
         </div>
       </div>
-
       <div className="window-body bg-[#c0c0c0]">
         <ul role="menubar" className="flex w-fit">
           {menuItems.map((menu, i) => (

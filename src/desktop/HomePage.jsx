@@ -6,12 +6,12 @@ import CommandPrompt from './CommandPrompt';
 import MineSweeper from './MineSweeper';
 import { desktopApps } from '../config/desktopApps';
 import Solitaire from '../solitaire/Solitaire';
+import Draggable from 'react-draggable';
 
 function HomePage() {
   return (
     <>
       <div className="relative flex h-screen w-full flex-col overflow-hidden">
-        {/* Background Image */}
         <div className="fixed inset-0 -z-10 h-screen w-full">
           <img
             src="/assets/windowXP-bliss.jpg"
@@ -22,6 +22,7 @@ function HomePage() {
         <div className="flex-1 overflow-hidden p-2 sm:p-3 md:p-4">
           <DesktopApps />
         </div>
+
         <MineSweeper />
         <Solitaire />
         <Chicken />

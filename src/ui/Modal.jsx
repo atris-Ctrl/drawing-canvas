@@ -1,5 +1,4 @@
 import { cloneElement, createContext, useContext, useState } from 'react';
-import Draggable from 'react-draggable';
 import useOutsideClick from '../useOutsideClick';
 
 const ModalContext = createContext();
@@ -31,7 +30,7 @@ function WindowWithMenu({
   const ref = useOutsideClick(close);
   if (openName !== name) return;
   return (
-    <div ref={ref} className="window active inline-block w-fit">
+    <div ref={ref} className="window active inline-block w-fit" style={{ position: 'absolute', zIndex: 1000 }}>
       <div className="title-bar w-full">
         <div className="title-bar-text flex w-fit items-center">
           {icon && <img src={icon} className="mr-1 h-auto w-4" />}

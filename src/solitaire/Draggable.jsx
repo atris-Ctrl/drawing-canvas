@@ -18,7 +18,11 @@ function Draggable({ children, id, data, disabled }) {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 999 : 'auto',
-    position: 'relative',
+    position: 'absolute',
+    touchAction: 'none',
+    userSelect: 'none',
+    cursor: 'grab',
+    pointerEvents: 'auto'
   };
 
   return (
