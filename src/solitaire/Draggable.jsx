@@ -13,28 +13,16 @@ function Draggable({ children, id, data, disabled }) {
     id,
     data,
   });
-  
   if (disabled) return children;
-  
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 900 : 'auto',
-    position: 'absolute',
-    touchAction: 'none',
-    userSelect: 'none',
-    cursor: 'grab',
-    pointerEvents: 'auto',
+    zIndex: isDragging ? 999 : 'auto',
+    position: 'relative',
   };
 
   return (
-    <div
-      className=""
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={style}
-    >
+    <div ref={setNodeRef} {...attributes} {...listeners} style={style}>
       {children}
     </div>
   );
