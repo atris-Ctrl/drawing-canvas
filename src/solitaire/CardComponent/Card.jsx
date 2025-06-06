@@ -31,14 +31,13 @@ function Card({
 
   const data = { location, pileIndex, cardIndex, card };
   const cardPath = faceUp ? cardPaths[id] : cardBackPaths[cardBack];
-  console.log(cardPath);
   const isDraggableDisabled = disabledClick || !faceUp;
 
   return (
-    <Draggable id={card.id} data={data} disabled={isDraggableDisabled}>
+    <Draggable id={id} data={data} disabled={isDraggableDisabled}>
       <div
         onClick={handleClick}
-        className="flex h-[80px] w-[60px] items-center justify-center"
+        className="flex h-[80px] w-[60px] items-center justify-center cursor-grab active:cursor-grabbing"
       >
         {!hide && <CardImage cardPath={cardPath} />}
       </div>

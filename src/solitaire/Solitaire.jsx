@@ -22,6 +22,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  closestCorners,
 } from '@dnd-kit/core';
 import ScoreAndTime from './ScoreAndTime';
 import Pile from './Pile';
@@ -235,7 +236,7 @@ function Solitaire() {
     useSensor(MouseSensor),
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5,
+        distance: 3,
       },
     }),
   );
@@ -277,6 +278,8 @@ function Solitaire() {
         card,
       } = cardDragged;
       const { index: toIndex, location: toLocation } = droppable;
+      console.log('Dragging from:', { fromLocation, pileIndex, cardIndex });
+      console.log('Dropping to:', { toLocation, toIndex });
       dispatch(
         createDragAction(
           fromLocation,
@@ -305,7 +308,7 @@ function Solitaire() {
                 position: 'relative',
                 width: '100%',
                 height: '100%',
-                overflow: 'hidden',
+                maxHeight: '98vh',
               }}
             >
               <DndContext
@@ -313,11 +316,12 @@ function Solitaire() {
                 onDragStart={(e) => handleDragStart(e)}
                 onDragEnd={(e) => handleDrag(e)}
                 sensors={sensors}
+                collisionDetection={closestCorners}
                 modifiers={[]}
               >
                 <div
                   ref={overlayContainerRef}
-                  className="relative inline-block bg-[#007f00] font-mono text-white"
+                  className="relative bg-[#007f00] font-mono text-white"
                   style={{
                     position: 'relative',
                     width: '100%',
@@ -352,7 +356,7 @@ function Solitaire() {
                       }}
                     >
                       {activeId.length > 0 && (
-                        <Pile cards={activeId} pileIndex={0} />
+                        <Pile cards={activeId} pileIndex={0} display={true} />
                       )}
                     </DragOverlay>
                     <Tableau

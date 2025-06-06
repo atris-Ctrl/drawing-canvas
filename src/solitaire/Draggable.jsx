@@ -13,11 +13,13 @@ function Draggable({ children, id, data, disabled }) {
     id,
     data,
   });
+  
   if (disabled) return children;
+  
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    zIndex: isDragging ? 999 : 'auto',
+    zIndex: isDragging ? 900 : 'auto',
     position: 'absolute',
     touchAction: 'none',
     userSelect: 'none',
@@ -27,7 +29,7 @@ function Draggable({ children, id, data, disabled }) {
 
   return (
     <div
-      className="border border-red-500"
+      className=""
       ref={setNodeRef}
       {...attributes}
       {...listeners}

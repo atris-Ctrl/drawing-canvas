@@ -1,13 +1,21 @@
 import { useDroppable } from '@dnd-kit/core';
 
 function Droppable({ children, id, data }) {
-  const { setNodeRef } = useDroppable({
+  const { setNodeRef, isOver } = useDroppable({
     id,
     data,
   });
 
   return (
-    <div className="h-full w-full border border-yellow-500" ref={setNodeRef}>
+    <div 
+      className="h-[90px] w-[60px] border-2 border-red-500"
+      ref={setNodeRef}
+      style={{
+        position: 'relative',
+        zIndex: isOver ? 100 : 1,
+        pointerEvents: 'auto',
+      }}
+    >
       {children}
     </div>
   );
