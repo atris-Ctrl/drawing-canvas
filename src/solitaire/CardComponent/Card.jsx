@@ -38,7 +38,7 @@ function Card({
     <Draggable id={card.id} data={data} disabled={isDraggableDisabled}>
       <div
         onClick={handleClick}
-        className="flex h-[90px] w-[60px] items-center justify-center"
+        className="flex h-[80px] w-[60px] items-center justify-center"
       >
         {!hide && <CardImage cardPath={cardPath} />}
       </div>

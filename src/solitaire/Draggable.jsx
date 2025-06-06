@@ -22,11 +22,17 @@ function Draggable({ children, id, data, disabled }) {
     touchAction: 'none',
     userSelect: 'none',
     cursor: 'grab',
-    pointerEvents: 'auto'
+    pointerEvents: 'auto',
   };
 
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners} style={style}>
+    <div
+      className="border border-red-500"
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={style}
+    >
       {children}
     </div>
   );

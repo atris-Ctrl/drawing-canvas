@@ -348,7 +348,7 @@ function Solitaire() {
                         easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
                       }}
                       style={{
-                        zIndex: 9999,
+                        zIndex: 900,
                       }}
                     >
                       {activeId.length > 0 && (
