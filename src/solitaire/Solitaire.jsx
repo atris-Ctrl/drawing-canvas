@@ -230,9 +230,7 @@ function reducer(state, action) {
 function Solitaire() {
   const overlayContainerRef = useRef();
   const [state, dispatch] = useReducer(reducer, undefined, init);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  
+
   const sensors = useSensors(
     useSensor(MouseSensor),
     useSensor(PointerSensor, {
@@ -254,24 +252,8 @@ function Solitaire() {
     cardBack,
   } = state;
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (isDragging) {
-        const rect = overlayContainerRef.current.getBoundingClientRect();
-        setMousePosition({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
-        });
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [isDragging]);
-
   function handleDragStart({ active }) {
     if (!active) return;
-    setIsDragging(true);
     const { card, cardIndex, location, pileIndex } = active.data.current;
     if (location === LOCATIONS.TABLEAU) {
       const currentPile = tableau[pileIndex];
@@ -306,20 +288,26 @@ function Solitaire() {
         ),
       );
     }
-    setIsDragging(false);
     setTimeout(() => setActiveId([]), 200);
   }
 
   return (
     <>
       <Modal>
-        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+        <div style={{ position: 'relative' }}>
           <ClosableWindow
             icon="assets/solitaire/icon/sol.ico"
             menuItems={menuItems(dispatch)}
             title="Solitaire"
           >
-            <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                overflow: 'hidden',
+              }}
+            >
               <DndContext
                 autoScroll={false}
                 onDragStart={(e) => handleDragStart(e)}
@@ -330,7 +318,11 @@ function Solitaire() {
                 <div
                   ref={overlayContainerRef}
                   className="relative inline-block bg-[#007f00] font-mono text-white"
-                  style={{ position: 'relative', width: '100%', height: '100%' }}
+                  style={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                  }}
                 >
                   <div className="p-3">
                     <div className="mb-5 flex justify-between">
@@ -349,13 +341,13 @@ function Solitaire() {
                       <Foundation foundation={foundation} dispatch={dispatch} />
                     </div>
 
-                    <DragOverlay 
+                    <DragOverlay
                       container={overlayContainerRef.current}
                       dropAnimation={{
                         duration: 200,
                         easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
                       }}
-                      style={{ 
+                      style={{
                         zIndex: 9999,
                       }}
                     >

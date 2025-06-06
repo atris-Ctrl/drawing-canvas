@@ -45,6 +45,8 @@ const Pile = function Pile({
             style={{
               top: `${cardOffsets[index]}px`,
               zIndex: index,
+              height: `${cardHeight}px`,
+              width: `${cardWidth}px`,
             }}
           >
             {index === cards.length - 1 ? (
